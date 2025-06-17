@@ -1,4 +1,4 @@
-package com.eclassify.wrteam
+package com.bissow.dev_app
 
 
 import io.flutter.embedding.android.FlutterActivity

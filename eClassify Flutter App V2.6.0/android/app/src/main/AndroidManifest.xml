@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.eclassify.wrteam">
+    package="com.bissow.dev_app">
   
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -85,12 +85,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="eclassifyweb.wrteam.me"
+                    android:host="bissow.com"
                     android:pathPattern="/product-details/.*"
                     android:scheme="eclassify" />
 
                 <data
-                    android:host="eclassifyweb.wrteam.me"
+                    android:host="bissow.com"
                     android:pathPattern="/seller/.*"
                     android:scheme="eclassify" />
 

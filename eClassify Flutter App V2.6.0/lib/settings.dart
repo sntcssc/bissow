@@ -30,10 +30,10 @@ class AppSettings {
 
 
   static const String applicationName = 'eClassify';
-  static const String packageName = 'com.eclassify.wrteam';
+  static const String packageName = 'com.bissow.dev_app';
 
   //PLEASE ADD WITH https://
-  static const String hostUrl = "PLACE_YOUR_ADMIN_PANEL_HOST_URL_HERE";
+  static const String hostUrl = "https://admin.bissow.com";
 
 
   ///API Setting
@@ -46,7 +46,7 @@ class AppSettings {
   static const int hiddenAPIProcessDelay = 1;
 
 
-  static const String shareNavigationWebUrl = "eclassifyweb.wrteam.me";
+  static const String shareNavigationWebUrl = "bissow.com";
 
   static const MapType googleMapType = MapType.normal;
 

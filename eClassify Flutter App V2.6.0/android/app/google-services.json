@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "897255360032",
+    "project_id": "bissow-a6967",
+    "storage_bucket": "bissow-a6967.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897255360032:android:13bf2d255cba02653b9e45",
+        "android_client_info": {
+          "package_name": "com.bissow.dev_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897255360032-k1gdj5kpk63nm0d26rlggpk9u0ap9irc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bissow.dev_app",
+            "certificate_hash": "40849bc8ada064d104670ca6d93bd2b319d8bb1e"
+          }
+        },
+        {
+          "client_id": "897255360032-gnjs61sgb4jl5r9eqtvsoe0r40m4mlf3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq1G_MQRF_JtIMXUyrZByrNOyjVGXpuQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897255360032-gnjs61sgb4jl5r9eqtvsoe0r40m4mlf3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
