@@ -60,6 +60,9 @@ class Api {
 
   static String stripeIntentAPI = "https://api.stripe.com/v1/payment_intents";
 
+  // Subhankar added
+  static String getNearbyUsersApi = "get-nearby-sellers";
+
   static String loginApi = "user-signup";
   static String updateProfileApi = "update-profile";
   static String getSliderApi = "get-slider";

@@ -40,6 +40,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
+// Subhankar added
+import 'package:eClassify/data/cubits/home/fetch_nearby_users_cubit.dart';
+import 'package:eClassify/ui/screens/home/widgets/nearby_users_widget.dart';
 
 const double sidePadding = 10;
 
@@ -126,6 +129,15 @@ class HomeScreenState extends State<HomeScreen>
         latitude: HiveUtils.getLatitude(),
         country: HiveUtils.getCountryName(),
         state: HiveUtils.getStateName());
+
+    context.read<FetchNearbyUsersCubit>().fetch(
+      city: HiveUtils.getCityName(),
+      radius: HiveUtils.getNearbyRadius(),
+      longitude: HiveUtils.getLongitude(),
+      latitude: HiveUtils.getLatitude(),
+      country: HiveUtils.getCountryName(),
+      state: HiveUtils.getStateName(),
+    );
   }
 
   @override
@@ -186,6 +198,7 @@ class HomeScreenState extends State<HomeScreen>
                   return SizedBox.shrink();
                 },
               ),
+              const NearbyUsersWidget(),
               const AllItemsWidget(),
             ],
           ),
@@ -201,6 +214,7 @@ class HomeScreenState extends State<HomeScreen>
         const HomeSearchField(),
         const SliderWidget(),
         const CategoryWidgetHome(),
+        // const NearbyUsersWidget(),
         ...List.generate(state.sections.length, (index) {
           HomeScreenSection section = state.sections[index];
           if (state.sections.isNotEmpty) {

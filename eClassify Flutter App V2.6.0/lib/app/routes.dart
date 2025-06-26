@@ -13,6 +13,7 @@ import 'package:eClassify/ui/screens/favorite_screen.dart';
 import 'package:eClassify/ui/screens/filter_screen.dart';
 import 'package:eClassify/ui/screens/home/category_list.dart';
 import 'package:eClassify/ui/screens/home/change_language_screen.dart';
+import 'package:eClassify/ui/screens/home/nearby_users_screen.dart';
 import 'package:eClassify/ui/screens/home/search_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/categoryFilterScreen.dart';
 import 'package:eClassify/ui/screens/home/widgets/posted_since_filter.dart';
@@ -137,6 +138,8 @@ class Routes {
   static const payStackWebViewScreen = '/payStackWebViewScreen';
   static const jobApplicationForm = '/jobApplicationForm';
   static const jobApplicationList = '/jobApplicationList';
+  // Subhankar added
+  static const nearbyUsersScreen = '/nearbyUsersScreen';
 
   static const playground = 'playground';
 
@@ -307,6 +310,10 @@ class Routes {
         return NearbyLocationScreen.route(routeSettings);
       case myReviewsScreen:
         return MyReviewScreen.route(routeSettings);
+
+      //   Subhankar added
+      case nearbyUsersScreen: // New route case
+        return NearbyUsersScreen.route(routeSettings);
 
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());

@@ -1,4 +1,5 @@
 import 'package:eClassify/data/model/home/home_screen_section.dart';
+import 'package:eClassify/data/model/user_model.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
@@ -111,6 +112,45 @@ class HomeRepository {
       return DataOutput(
           total: response['data']['total'] ?? 0, modelList: items);
     } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<DataOutput<UserModel>> fetchNearbyUsers({
+    required int page,
+    String? country,
+    String? state,
+    String? city,
+    int? areaId,
+    int? radius,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      Map<String, dynamic> parameters = {
+        "page": page,
+        if (radius == null) ...{
+          if (city != null && city != "") 'city': city,
+          if (areaId != null && areaId != "") 'area_id': areaId,
+          if (country != null && country != "") 'country': country,
+          if (state != null && state != "") 'state': state,
+        },
+        if (radius != null && radius != "") 'radius': radius,
+        if (latitude != null && latitude != "") 'latitude': latitude,
+        if (longitude != null && longitude != "") 'longitude': longitude,
+        "sort_by": "new-to-old"
+      };
+
+      Map<String, dynamic> response =
+      await Api.get(url: Api.getNearbyUsersApi, queryParameters: parameters);
+      List<UserModel> users = (response['data']['data'] as List)
+          .map((e) => UserModel.fromJson(e))
+          .toList();
+
+      return DataOutput(
+          total: response['data']['total'] ?? 0, modelList: users);
+    } catch (error) {
+      print('FetchNearbyUsers Repo fetch error: $error');
       rethrow;
     }
   }

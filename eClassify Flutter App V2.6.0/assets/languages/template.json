@@ -634,5 +634,9 @@
   "adminEdited": "Admin Edited",
   "adEditedBy": "Ad Edited by",
   "admin": "Admin",
-  "jobClosed": "Job Closed"
+  "jobClosed": "Job Closed",
+
+  "nearbyUsers": "Nearby Users",
+  "noUsersFound": "No Users Found",
+  "noUsersAvailableInThisLocation": "No users available in this location"
 }

@@ -1,6 +1,7 @@
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
 import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
+import 'package:eClassify/data/cubits/home/fetch_nearby_users_cubit.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/custom_text.dart';
@@ -246,6 +247,15 @@ class LocationHelperWidget {
             latitude: fetchHomeLatitude,
             longitude: fetchHomeLongitude,
             radius: radius);
+
+        context.read<FetchNearbyUsersCubit>().fetch(
+          city: HiveUtils.getCityName(),
+          radius: HiveUtils.getNearbyRadius(),
+          longitude: HiveUtils.getLongitude(),
+          latitude: HiveUtils.getLatitude(),
+          country: HiveUtils.getCountryName(),
+          state: HiveUtils.getStateName(),
+        );
       },
     );
     if (isPopUntil) Navigator.popUntil(context, (route) => route.isFirst);
