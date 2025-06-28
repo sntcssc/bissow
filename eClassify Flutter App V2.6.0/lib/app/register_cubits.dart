@@ -108,6 +108,7 @@ class RegisterCubits {
     BlocProvider(create: (context) => AuthenticationCubit()),
     BlocProvider(create: (context) => FetchHomeScreenCubit()),
     BlocProvider(create: (context) => FetchHomeAllItemsCubit()),
+    BlocProvider(create: (context) => FetchNearbyUsersCubit()),
     BlocProvider(create: (context) => DeleteItemCubit()),
     BlocProvider(create: (context) => ItemTotalClickCubit()),
     BlocProvider(create: (context) => FetchSectionItemsCubit()),
@@ -154,6 +155,5 @@ class RegisterCubits {
     BlocProvider(
       create: (context) => FetchJobApplicationCubit(),
     ),
-    BlocProvider(create: (context) => FetchNearbyUsersCubit()),
   ];
 }

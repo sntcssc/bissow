@@ -237,8 +237,8 @@ class UserCard extends StatelessWidget {
                   Text(
                     user.name ?? "Unknown User",
                     style: TextStyle(
-                      fontSize: context.font.large,
-                      fontWeight: FontWeight.w600,
+                      fontSize: context.font.normal,
+                      fontWeight: FontWeight.w500,
                       color: context.color.textDefaultColor,
                     ),
                     maxLines: 1,

@@ -37,7 +37,7 @@ class _NearbyUsersScreenState extends State<NearbyUsersScreen> {
         context.read<FetchNearbyUsersCubit>().fetchMore(
           city: HiveUtils.getCityName(),
           country: HiveUtils.getCountryName(),
-          state: HiveUtils.getStateName(),
+          stateName: HiveUtils.getStateName(),
           radius: HiveUtils.getNearbyRadius(),
           longitude: HiveUtils.getLongitude(),
           latitude: HiveUtils.getLatitude(),
@@ -268,7 +268,7 @@ class UserHorizontalCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: context.font.normal,
                         color: context.color.textDefaultColor,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

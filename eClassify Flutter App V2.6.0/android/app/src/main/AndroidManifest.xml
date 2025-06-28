@@ -45,7 +45,7 @@
         android:allowBackup="false"
         android:fullBackupOnly="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="eClassify"
+        android:label="Bissow"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
@@ -87,12 +87,12 @@
                 <data
                     android:host="bissow.com"
                     android:pathPattern="/product-details/.*"
-                    android:scheme="eclassify" />
+                    android:scheme="bissow" />
 
                 <data
                     android:host="bissow.com"
                     android:pathPattern="/seller/.*"
-                    android:scheme="eclassify" />
+                    android:scheme="bissow" />
 
             </intent-filter>
 

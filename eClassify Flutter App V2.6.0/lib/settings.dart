@@ -29,7 +29,7 @@ class AppSettings {
   /// Basic Settings
 
 
-  static const String applicationName = 'eClassify';
+  static const String applicationName = 'Bissow';
   static const String packageName = 'com.bissow.dev_app';
 
   //PLEASE ADD WITH https://

@@ -112,7 +112,7 @@ class FetchNearbyUsersCubit extends Cubit<FetchNearbyUsersState> {
 
   Future<void> fetchMore({
     String? country,
-    String? state,
+    String? stateName,
     String? city,
     int? areaId,
     int? radius,
@@ -130,7 +130,7 @@ class FetchNearbyUsersCubit extends Cubit<FetchNearbyUsersState> {
           city: city,
           areaId: areaId,
           country: country,
-          state: state,
+          state: stateName,
           radius: radius,
           latitude: latitude,
           longitude: longitude,
