@@ -151,37 +151,53 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   void initState() {
     super.initState();
     isFromLogin = widget.from == 'login';
-    formatedAddress = AddressComponent(
-      area: HiveUtils.getCurrentAreaName() ?? '',
-      city: HiveUtils.getCityName() ?? '',
-      state: HiveUtils.getStateName() ?? '',
-      country: HiveUtils.getCountryName() ?? '',
-      areaId: null,
-    );
-    latitude = HiveUtils.getLatitude();
-    longitude = HiveUtils.getLongitude();
 
-    nameController.text = HiveUtils.getUserDetails().name ?? "";
-    emailController.text = HiveUtils.getUserDetails().email ?? "";
-    addressController.text = HiveUtils.getUserDetails().address ?? "";
+    // Initialize user details
+    final userDetails = HiveUtils.getUserDetails();
+    nameController.text = userDetails.name ?? "";
+    emailController.text = userDetails.email ?? "";
+    addressController.text = userDetails.address ?? "";
+
+    // Initialize location only if at least one location field is non-null and non-empty
+    if (userDetails.area != null ||
+        userDetails.city != null ||
+        userDetails.state != null ||
+        userDetails.country != null ||
+        userDetails.latitude != null ||
+        userDetails.longitude != null ||
+        userDetails.areaId != null) {
+      formatedAddress = AddressComponent(
+        area: userDetails.area?.isNotEmpty == true ? userDetails.area : null,
+        areaId: userDetails.areaId,
+        city: userDetails.city?.isNotEmpty == true ? userDetails.city : null,
+        state: userDetails.state?.isNotEmpty == true ? userDetails.state : null,
+        country: userDetails.country?.isNotEmpty == true ? userDetails.country : null,
+      );
+      latitude = userDetails.latitude;
+      longitude = userDetails.longitude;
+      log('Initialized location: formatedAddress=$formatedAddress, latitude=$latitude, longitude=$longitude, areaId=${userDetails.areaId}');
+    } else {
+      formatedAddress = null;
+      latitude = null;
+      longitude = null;
+      log('No location data found in user details');
+    }
 
     if (isFromLogin) {
       isNotificationsEnabled = true;
       isPersonalDetailShow = true;
     } else {
-      isNotificationsEnabled =
-      HiveUtils.getUserDetails().notification == 1 ? true : false;
-      isPersonalDetailShow =
-      HiveUtils.getUserDetails().isPersonalDetailShow == 1 ? true : false;
+      isNotificationsEnabled = userDetails.notification == 1 ? true : false;
+      isPersonalDetailShow = userDetails.isPersonalDetailShow == 1 ? true : false;
     }
 
     if (HiveUtils.getCountryCode() != null) {
       countryCode = HiveUtils.getCountryCode() ?? '';
-      phoneController.text = HiveUtils.getUserDetails().mobile != null
-          ? HiveUtils.getUserDetails().mobile!.replaceFirst("+$countryCode", "")
+      phoneController.text = userDetails.mobile != null
+          ? userDetails.mobile!.replaceFirst("+$countryCode", "")
           : "";
     } else {
-      phoneController.text = HiveUtils.getUserDetails().mobile ?? "";
+      phoneController.text = userDetails.mobile ?? "";
     }
 
     profileImagePicker.listener((files) {
@@ -195,7 +211,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     profileImagePicker.dispose();
     phoneController.dispose();
     nameController.dispose();
@@ -203,6 +218,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     addressController.dispose();
     cityTextController.dispose();
     countryTextController.dispose();
+    super.dispose();
   }
 
   Future<void> getLocationFromLatitudeLongitude({required LatLng latLng}) async {
@@ -216,57 +232,58 @@ class UserProfileScreenState extends State<UserProfileScreen> {
             (await placemarkFromCoordinates(newLatitude, newLongitude)).first;
 
         formatedAddress = AddressComponent(
-          area: placeMark.subLocality ?? '',
+          area: placeMark.subLocality?.isNotEmpty == true ? placeMark.subLocality : null,
           areaId: null,
-          city: placeMark.locality ?? '',
-          country: placeMark.country ?? '',
-          state: placeMark.administrativeArea ?? '',
+          city: placeMark.locality?.isNotEmpty == true ? placeMark.locality : null,
+          country: placeMark.country?.isNotEmpty == true ? placeMark.country : null,
+          state: placeMark.administrativeArea?.isNotEmpty == true ? placeMark.administrativeArea : null,
         );
-
+        latitude = newLatitude;
+        longitude = newLongitude;
+        log('Fetched location (free_api): $formatedAddress');
         setState(() {});
       } catch (e) {
-        log(e.toString());
-        formatedAddress = AddressComponent(
-          area: '',
-          areaId: null,
-          city: '',
-          country: '',
-          state: '',
-        );
+        log('Error fetching location (free_api): $e');
+        formatedAddress = null;
+        latitude = null;
+        longitude = null;
         setState(() {});
       }
     } else {
       try {
         final paidCubit = context.read<PaidApiLocationDataCubit>();
-        await paidCubit.fetchPaidApiLocations(
-            lat: newLatitude, lng: newLongitude);
+        await paidCubit.fetchPaidApiLocations(lat: newLatitude, lng: newLongitude);
 
         final state = paidCubit.state;
         if (state is PaidApiLocationSuccess && state.locations.isNotEmpty) {
           final location = state.locations.first;
 
           formatedAddress = AddressComponent(
-              area: location.sublocality ?? '',
-              areaId: null,
-              city: location.locality ?? location.name ?? '',
-              country: location.country ?? '',
-                state: location.state ?? '',
-              );
-
-              setState(() {});
+            area: location.sublocality?.isNotEmpty == true ? location.sublocality : null,
+            areaId: null,
+            city: (location.locality ?? location.name)?.isNotEmpty == true ? (location.locality ?? location.name) : null,
+            country: location.country?.isNotEmpty == true ? location.country : null,
+            state: location.state?.isNotEmpty == true ? location.state : null,
+          );
+          latitude = newLatitude;
+          longitude = newLongitude;
+          log('Fetched location (paid_api): $formatedAddress');
+          setState(() {});
+        } else {
+          formatedAddress = null;
+          latitude = null;
+          longitude = null;
+          log('No location data from paid API');
+          setState(() {});
+        }
+      } catch (e) {
+        log('Error fetching location (paid_api): $e');
+        formatedAddress = null;
+        latitude = null;
+        longitude = null;
+        setState(() {});
+      }
     }
-    } catch (e) {
-    log(e.toString());
-    formatedAddress = AddressComponent(
-    area: '',
-    areaId: null,
-    city: '',
-    country: '',
-    state: '',
-    );
-    setState(() {});
-    }
-  }
   }
 
   void dialogueBottomSheet({
@@ -288,33 +305,34 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                 if (from == 1) {
                   formatedAddress = AddressComponent.copyWithFields(
                     formatedAddress!,
-                    newCity: controller.text,
+                    newCity: controller.text.isNotEmpty ? controller.text : null,
                   );
                 } else if (from == 3) {
                   formatedAddress = AddressComponent.copyWithFields(
                     formatedAddress!,
-                    newCountry: controller.text,
+                    newCountry: controller.text.isNotEmpty ? controller.text : null,
                   );
                 }
               } else {
                 if (from == 1) {
                   formatedAddress = AddressComponent(
-                    area: '',
+                    area: null,
                     areaId: null,
-                    city: controller.text,
-                    country: '',
-                    state: '',
+                    city: controller.text.isNotEmpty ? controller.text : null,
+                    country: null,
+                    state: null,
                   );
                 } else if (from == 3) {
                   formatedAddress = AddressComponent(
-                    area: '',
+                    area: null,
                     areaId: null,
-                    city: '',
-                    country: controller.text,
-                    state: '',
+                    city: null,
+                    country: controller.text.isNotEmpty ? controller.text : null,
+                    state: null,
                   );
                 }
               }
+              log('Updated formatedAddress from dialog: $formatedAddress');
               Navigator.pop(context);
             });
           }
@@ -404,6 +422,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
+    log('Building UserProfileScreen, isFromLogin: $isFromLogin, formatedAddress: $formatedAddress');
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -412,67 +431,73 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           backgroundColor: context.color.primaryColor,
           appBar: isFromLogin
               ? null
-              : UiUtils.buildAppBar(context, showBackButton: true),
+              : UiUtils.buildAppBar(context,
+              showBackButton: true,
+              title: "editprofile".translate(context)),
           body: Stack(
             children: [
               ScrollConfiguration(
                 behavior: RemoveGlow(),
                 child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.all(20.0),
-                    child: Form(
-                        key: _formKey,
-                        child: Column(
-                            spacing: 10,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Align(
-                                alignment: AlignmentDirectional.center,
-                                child: buildProfilePicture(),
-                              ),
-                              buildTextField(
-                                context,
-                                title: "fullName",
-                                controller: nameController,
-                                validator: CustomTextFieldValidator.nullCheck,
-                              ),
-                              buildTextField(
-                                context,
-                                readOnly: [
-                                  AuthenticationType.email.name,
-                                  AuthenticationType.google.name,
-                                  AuthenticationType.apple.name
-                                ].contains(HiveUtils.getUserDetails().type),
-                                title: "emailAddress",
-                                controller: emailController,
-                                validator: CustomTextFieldValidator.email,
-                              ),
-                              phoneWidget(),
-                              buildTextField(context,
-                                  title: "addressLbl",
-                                  controller: addressController,
-                                  maxline: 5,
-                                  textInputAction: TextInputAction.newline),
-                              // buildLocationWidget(),
-                              CustomText(
-                                "notification".translate(context),
-                              ),
-                              buildEnableDisableSwitch(isNotificationsEnabled,
-                                      (cgvalue) {
-                                    isNotificationsEnabled = cgvalue;
-                                    setState(() {});
-                                  }),
-                              CustomText(
-                                "showContactInfo".translate(context),
-                              ),
-                              buildEnableDisableSwitch(isPersonalDetailShow,
-                                      (cgvalue) {
-                                    isPersonalDetailShow = cgvalue;
-                                    setState(() {});
-                                  }),
-                              buildLocationWidget(),
-                              updateProfileBtnWidget(),
-                            ]))),
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      spacing: 20,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Align(
+                          alignment: AlignmentDirectional.center,
+                          child: buildProfilePicture(),
+                        ),
+                        buildTextField(
+                          context,
+                          title: "fullName",
+                          controller: nameController,
+                          validator: CustomTextFieldValidator.nullCheck,
+                        ),
+                        buildTextField(
+                          context,
+                          readOnly: [
+                            AuthenticationType.email.name,
+                            AuthenticationType.google.name,
+                            AuthenticationType.apple.name
+                          ].contains(HiveUtils.getUserDetails().type),
+                          title: "emailAddress",
+                          controller: emailController,
+                          validator: CustomTextFieldValidator.email,
+                        ),
+                        phoneWidget(),
+                        buildTextField(
+                          context,
+                          title: "addressLbl",
+                          controller: addressController,
+                          maxline: 5,
+                          textInputAction: TextInputAction.newline,
+                        ),
+                        buildLocationWidget(),
+                        CustomText(
+                          "notification".translate(context),
+                        ),
+                        buildEnableDisableSwitch(isNotificationsEnabled,
+                                (cgvalue) {
+                              isNotificationsEnabled = cgvalue;
+                              setState(() {});
+                            }),
+                        CustomText(
+                          "showContactInfo".translate(context),
+                        ),
+                        buildEnableDisableSwitch(isPersonalDetailShow,
+                                (cgvalue) {
+                              isPersonalDetailShow = cgvalue;
+                              setState(() {});
+                            }),
+                        updateProfileBtnWidget(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               if (isLoading != null && isLoading!)
                 Center(
@@ -494,29 +519,41 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget buildLocationWidget() {
-    return Column(
-      spacing: 10,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomText(
-          "selectYourLocation".translate(context),
-          color: context.color.textDefaultColor,
+    log('Rendering buildLocationWidget, formatedAddress: $formatedAddress');
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: context.color.textLightColor.withValues(alpha: 0.3),
         ),
-        Row(
-          spacing: 10,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 25,
-              height: 25,
-              decoration: BoxDecoration(
-                color: context.color.territoryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(
-                    width: Constant.borderWidth,
-                    color: context.color.borderColor),
-              ),
-              child: SizedBox(
+        borderRadius: BorderRadius.circular(10),
+        color: context.color.secondaryColor.withOpacity(0.1),
+      ),
+      child: Column(
+        spacing: 10,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            "selectYourLocation".translate(context),
+            color: context.color.textDefaultColor,
+            fontSize: context.font.larger,
+            fontWeight: FontWeight.bold,
+          ),
+          Row(
+            spacing: 10,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  color: context.color.territoryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                      width: Constant.borderWidth,
+                      color: context.color.borderColor),
+                ),
+                child: SizedBox(
                   width: 8.11,
                   height: 5.67,
                   child: SvgPicture.asset(
@@ -524,144 +561,186 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                     fit: BoxFit.none,
                     colorFilter: ColorFilter.mode(
                         context.color.territoryColor, BlendMode.srcIn),
-                  )),
-            ),
-            Expanded(
-              child: Column(
-                spacing: 4,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    formatedAddress == null
-                        ? "____"
-                        : (formatedAddress!.city == null ||
-                        formatedAddress!.city!.isEmpty)
-                        ? (formatedAddress!.area != null &&
-                        formatedAddress!.area!.isNotEmpty
-                        ? formatedAddress!.area!
-                        : "____")
-                        : (formatedAddress!.area != null &&
-                        formatedAddress!.area!.isNotEmpty
-                        ? "${formatedAddress!.area!}, ${formatedAddress!.city!}"
-                        : formatedAddress!.city!),
-                    fontSize: context.font.large,
                   ),
-                  CustomText(
-                    "${formatedAddress == null || (formatedAddress?.state == "" || formatedAddress?.state == null) ? "____" : formatedAddress?.state},${formatedAddress == null || formatedAddress!.country == "" ? "____" : formatedAddress!.country}",
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
-        UiUtils.buildButton(context,
-            height: 48,
-            onPressed: () {
-              Navigator.pushNamed(context, Routes.countriesScreen,
-                  arguments: {"from": "profile"}).then((value) {
-                if (value != null) {
-                  Map<String, dynamic> location = value as Map<String, dynamic>;
-                  setState(() {
-                    formatedAddress = AddressComponent(
-                      area: location["area"] ?? '',
-                      areaId: location["area_id"],
-                      city: location["city"] ?? '',
-                      country: location["country"] ?? '',
-                      state: location["state"] ?? '',
-                    );
-                    latitude = location["latitude"];
-                    longitude = location["longitude"];
-                  });
-                }
-              });
-            },
-            fontSize: 14,
-            buttonTitle: "changeLocation".translate(context),
-            textColor: context.color.textDefaultColor,
-            buttonColor: context.color.secondaryColor,
-            border: BorderSide(
-                color: context.color.textDefaultColor.withValues(alpha: 0.3),
-                width: 1.5),
-            radius: 5),
-        UiUtils.buildButton(context,
-            height: 48,
-            onPressed: () async {
-              LocationPermission permission = await Geolocator.checkPermission();
-              if (permission == LocationPermission.deniedForever) {
-                await Geolocator.openLocationSettings();
-              } else if (permission == LocationPermission.denied) {
-                permission = await Geolocator.requestPermission();
-                if (permission != LocationPermission.whileInUse &&
-                    permission != LocationPermission.always) {
-                  return;
-                }
-              }
-              try {
-                Position position = await Geolocator.getCurrentPosition(
-                    locationSettings:
-                    LocationSettings(accuracy: LocationAccuracy.high));
-                latitude = position.latitude;
-                longitude = position.longitude;
-                await getLocationFromLatitudeLongitude(
-                    latLng: LatLng(latitude!, longitude!));
-              } catch (e) {
-                HelperUtils.showSnackBarMessage(
-                    context, "locationError".translate(context));
-              }
-            },
-            fontSize: 14,
-            buttonTitle: "useCurrentLocation".translate(context),
-            textColor: context.color.textDefaultColor,
-            buttonColor: context.color.secondaryColor,
-            border: BorderSide(
-                color: context.color.textDefaultColor.withValues(alpha: 0.3),
-                width: 1.5),
-            radius: 5),
-      ],
+              Expanded(
+                child: Column(
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      formatedAddress == null ||
+                          (formatedAddress!.city == null &&
+                              formatedAddress!.area == null)
+                          ? "selectLocation".translate(context)
+                          : (formatedAddress!.city == null ||
+                          formatedAddress!.city!.isEmpty)
+                          ? (formatedAddress!.area != null &&
+                          formatedAddress!.area!.isNotEmpty
+                          ? formatedAddress!.area!
+                          : "selectLocation".translate(context))
+                          : (formatedAddress!.area != null &&
+                          formatedAddress!.area!.isNotEmpty
+                          ? "${formatedAddress!.area!}, ${formatedAddress!.city!}"
+                          : formatedAddress!.city!),
+                      fontSize: context.font.large,
+                      color: context.color.textDefaultColor,
+                    ),
+                    CustomText(
+                      formatedAddress == null ||
+                          (formatedAddress!.state == null &&
+                              formatedAddress!.country == null)
+                          ? "____, ____"
+                          : "${formatedAddress!.state?.isNotEmpty == true ? formatedAddress!.state : "____"}, ${formatedAddress!.country?.isNotEmpty == true ? formatedAddress!.country : "____"}",
+                      color: context.color.textLightColor,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            spacing: 10,
+            children: [
+              Expanded(
+                child: UiUtils.buildButton(
+                  context,
+                  height: 48,
+                  onPressed: () {
+                    log('Navigating to countriesScreen');
+                    Navigator.pushNamed(context, Routes.countriesScreen,
+                        arguments: {"from": "profile"}).then((value) {
+                      if (value != null) {
+                        Map<String, dynamic> location =
+                        value as Map<String, dynamic>;
+                        setState(() {
+                          formatedAddress = AddressComponent(
+                            area: location["area"]?.isNotEmpty == true
+                                ? location["area"]
+                                : null,
+                            areaId: location["area_id"],
+                            city: location["city"]?.isNotEmpty == true
+                                ? location["city"]
+                                : null,
+                            country: location["country"]?.isNotEmpty == true
+                                ? location["country"]
+                                : null,
+                            state: location["state"]?.isNotEmpty == true
+                                ? location["state"]
+                                : null,
+                          );
+                          latitude = location["latitude"];
+                          longitude = location["longitude"];
+                          log('Updated formatedAddress from countriesScreen: $formatedAddress');
+                        });
+                      }
+                    });
+                  },
+                  fontSize: 14,
+                  buttonTitle: "changeLocation".translate(context),
+                  textColor: context.color.textDefaultColor,
+                  buttonColor: context.color.secondaryColor,
+                  border: BorderSide(
+                      color: context.color.textDefaultColor.withValues(alpha: 0.3),
+                      width: 1.5),
+                  radius: 5,
+                ),
+              ),
+              Expanded(
+                child: UiUtils.buildButton(
+                  context,
+                  height: 48,
+                  onPressed: () async {
+                    log('Requesting current location');
+                    LocationPermission permission =
+                    await Geolocator.checkPermission();
+                    if (permission == LocationPermission.deniedForever) {
+                      log('Location permission denied forever');
+                      await Geolocator.openLocationSettings();
+                    } else if (permission == LocationPermission.denied) {
+                      permission = await Geolocator.requestPermission();
+                      if (permission != LocationPermission.whileInUse &&
+                          permission != LocationPermission.always) {
+                        log('Location permission denied');
+                        return;
+                      }
+                    }
+                    try {
+                      Position position = await Geolocator.getCurrentPosition(
+                          locationSettings:
+                          LocationSettings(accuracy: LocationAccuracy.high));
+                      latitude = position.latitude;
+                      longitude = position.longitude;
+                      log('Current position: ($latitude, $longitude)');
+                      await getLocationFromLatitudeLongitude(
+                          latLng: LatLng(latitude!, longitude!));
+                    } catch (e) {
+                      log('Error getting current location: $e');
+                      HelperUtils.showSnackBarMessage(
+                          context, "locationError".translate(context));
+                    }
+                  },
+                  fontSize: 14,
+                  buttonTitle: "useCurrentLocation".translate(context),
+                  textColor: context.color.textDefaultColor,
+                  buttonColor: context.color.onTertiary,
+                  border: BorderSide(
+                      color: context.color.textDefaultColor.withValues(alpha: 0.3),
+                      width: 1.5),
+                  radius: 5,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget phoneWidget() {
     return Column(
-        spacing: 10,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomText(
-            "phoneNumber".translate(context),
-            color: context.color.textDefaultColor,
-          ),
-          CustomTextFormField(
-            controller: phoneController,
-            validator: CustomTextFieldValidator.phoneNumber,
-            keyboard: TextInputType.phone,
-            isReadOnly:
-            HiveUtils.getUserDetails().type == AuthenticationType.phone.name,
-            fillColor: context.color.secondaryColor,
-            onChange: (value) {
-              setState(() {});
+      spacing: 10,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomText(
+          "phoneNumber".translate(context),
+          color: context.color.textDefaultColor,
+        ),
+        CustomTextFormField(
+          controller: phoneController,
+          validator: CustomTextFieldValidator.phoneNumber,
+          keyboard: TextInputType.phone,
+          isReadOnly:
+          HiveUtils.getUserDetails().type == AuthenticationType.phone.name,
+          fillColor: context.color.secondaryColor,
+          onChange: (value) {
+            setState(() {});
+          },
+          isMobileRequired: false,
+          fixedPrefix: GestureDetector(
+            onTap: () {
+              if (HiveUtils.getUserDetails().type !=
+                  AuthenticationType.phone.name) {
+                showCountryCode();
+              }
             },
-            isMobileRequired: false,
-            fixedPrefix: GestureDetector(
-              onTap: () {
-                if (HiveUtils.getUserDetails().type !=
-                    AuthenticationType.phone.name) {
-                  showCountryCode();
-                }
-              },
-              child: Container(
-                  width: 55,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-                  alignment: Alignment.center,
-                  child: CustomText(
-                    formatCountryCode(countryCode!),
-                    fontSize: context.font.large,
-                    textAlign: TextAlign.center,
-                  )),
+            child: Container(
+              width: 55,
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+              alignment: Alignment.center,
+              child: CustomText(
+                formatCountryCode(countryCode!),
+                fontSize: context.font.large,
+                textAlign: TextAlign.center,
+              ),
             ),
-            hintText: "phoneNumber".translate(context),
-          )
-        ]);
+          ),
+          hintText: "phoneNumber".translate(context),
+        ),
+      ],
+    );
   }
 
   String formatCountryCode(String countryCode) {
@@ -682,12 +761,13 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   Widget buildEnableDisableSwitch(bool value, Function(bool) onChangeFunction) {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(
-            color: context.color.textLightColor.withValues(alpha: 0.23),
-            width: 1.5,
-          ),
-          borderRadius: BorderRadius.circular(10),
-          color: context.color.secondaryColor),
+        border: Border.all(
+          color: context.color.textLightColor.withValues(alpha: 0.23),
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(10),
+        color: context.color.secondaryColor,
+      ),
       height: 60,
       width: double.infinity,
       padding: const EdgeInsetsDirectional.only(start: 16.0),
@@ -704,19 +784,21 @@ class UserProfileScreenState extends State<UserProfileScreen> {
             activeTrackColor: context.color.territoryColor,
             value: value,
             onChanged: onChangeFunction,
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget buildTextField(BuildContext context,
-      {required String title,
+  Widget buildTextField(
+      BuildContext context, {
+        required String title,
         required TextEditingController controller,
         CustomTextFieldValidator? validator,
         bool? readOnly,
         int? maxline,
-        TextInputAction? textInputAction}) {
+        TextInputAction? textInputAction,
+      }) {
     return Column(
       spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -781,9 +863,9 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           width: 124,
           alignment: AlignmentDirectional.center,
           decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border:
-              Border.all(color: context.color.territoryColor, width: 2)),
+            shape: BoxShape.circle,
+            border: Border.all(color: context.color.territoryColor, width: 2),
+          ),
           child: Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
@@ -801,20 +883,23 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           child: InkWell(
             onTap: showPicker,
             child: Container(
-                height: 37,
-                width: 37,
-                alignment: AlignmentDirectional.center,
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: context.color.buttonColor, width: 1.5),
-                    shape: BoxShape.circle,
-                    color: context.color.territoryColor),
-                child: SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: UiUtils.getSvg(AppIcons.edit))),
+              height: 37,
+              width: 37,
+              alignment: AlignmentDirectional.center,
+              decoration: BoxDecoration(
+                border:
+                Border.all(color: context.color.buttonColor, width: 1.5),
+                shape: BoxShape.circle,
+                color: context.color.territoryColor,
+              ),
+              child: SizedBox(
+                width: 15,
+                height: 15,
+                child: UiUtils.getSvg(AppIcons.edit),
+              ),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -829,10 +914,11 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         HelperUtils.showSnackBarMessage(
             context, "cityRequired".translate(context));
         dialogueBottomSheet(
-            controller: cityTextController,
-            title: "enterCity".translate(context),
-            hintText: "city".translate(context),
-            from: 1);
+          controller: cityTextController,
+          title: "enterCity".translate(context),
+          hintText: "city".translate(context),
+          from: 1,
+        );
         return;
       } else if (formatedAddress == null ||
           (formatedAddress!.country == null ||
@@ -840,10 +926,11 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         HelperUtils.showSnackBarMessage(
             context, "countryRequired".translate(context));
         dialogueBottomSheet(
-            controller: countryTextController,
-            title: "enterCountry".translate(context),
-            hintText: "country".translate(context),
-            from: 3);
+          controller: countryTextController,
+          title: "enterCountry".translate(context),
+          hintText: "country".translate(context),
+          from: 3,
+        );
         return;
       }
       if (isFromLogin) {
@@ -868,15 +955,16 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         notification: isNotificationsEnabled ? "1" : "0",
         countryCode: countryCode ?? '',
         personalDetail: isPersonalDetailShow ? 1 : 0,
-        area: formatedAddress?.area ?? '',
-        city: formatedAddress?.city ?? '',
-        state: formatedAddress?.state ?? '',
-        country: formatedAddress?.country ?? '',
+        area: formatedAddress?.area,
+        city: formatedAddress?.city,
+        state: formatedAddress?.state,
+        country: formatedAddress?.country,
         latitude: latitude,
         longitude: longitude,
         areaId: formatedAddress?.areaId,
       );
 
+      log('Profile update response: $response');
       Future.delayed(
         Duration.zero,
             () {
@@ -917,6 +1005,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         );
       }
     } catch (e) {
+      log('Error updating profile: $e');
       Future.delayed(Duration.zero, () {
         setState(() {
           isLoading = false;
