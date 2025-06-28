@@ -50,7 +50,15 @@ class AuthCubit extends Cubit<AuthState> {
       String? notification,
       String? mobile,
       String? countryCode,
-      int? personalDetail}) async {
+      int? personalDetail,
+      String? area, // Added for location
+      String? city, // Added for location
+      String? state, // Added for location
+      String? country, // Added for location
+      double? latitude, // Added for location
+      double? longitude, // Added for location
+      int? areaId, // Added for location
+      }) async {
     Map<String, dynamic> parameters = {
       Api.name: name ?? '',
       Api.email: email ?? '',
@@ -59,7 +67,14 @@ class AuthCubit extends Cubit<AuthState> {
       Api.notification: notification,
       Api.mobile: mobile,
       Api.countryCode: countryCode,
-      Api.personalDetail: personalDetail
+      Api.personalDetail: personalDetail,
+      Api.area: area ?? '', // Add area to parameters
+      Api.city: city ?? '', // Add city to parameters
+      Api.state: state ?? '', // Add state to parameters
+      Api.country: country ?? '', // Add country to parameters
+      Api.latitude: latitude?.toString(), // Convert to string for API
+      Api.longitude: longitude?.toString(), // Convert to string for API
+      Api.areaId: areaId?.toString(), // Convert to string for API
     };
     if (fileUserimg != null) {
       parameters['profile'] = await MultipartFile.fromFile(fileUserimg.path);

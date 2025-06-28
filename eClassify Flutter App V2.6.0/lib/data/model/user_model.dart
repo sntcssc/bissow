@@ -17,6 +17,13 @@ class UserModel {
   String? token;
   String? updatedAt;
   int? isVerified;
+  String? area; // Added
+  String? city; // Added
+  String? state; // Added
+  String? country; // Added
+  double? latitude; // Added
+  double? longitude; // Added
+  int? areaId; // Added
 
   UserModel({this.address,
     this.createdAt,
@@ -35,7 +42,15 @@ class UserModel {
     this.token,
     this.updatedAt,
     this.isPersonalDetailShow,
-    this.isVerified});
+    this.isVerified,
+    this.area,
+    this.city,
+    this.state,
+    this.country,
+    this.latitude,
+    this.longitude,
+    this.areaId,
+  });
 
   UserModel.fromJson(Map<String, dynamic> json) {
     address = json['address'];
@@ -65,6 +80,14 @@ class UserModel {
         ? json['show_personal_details']
         : int.parse(json['show_personal_details'])
         : null);
+
+    area = json['area'];
+    city = json['city'];
+    state = json['state'];
+    country = json['country'];
+    latitude = json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null;
+    longitude = json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null;
+    areaId = json['area_id'] != null ? int.tryParse(json['area_id'].toString()) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -87,6 +110,13 @@ class UserModel {
     data['updated_at'] = updatedAt;
     data['show_personal_details'] = isPersonalDetailShow;
     data['is_verified'] = isVerified;
+    data['area']= area;
+    data['city']= city;
+    data['state']= state;
+    data['country']= country;
+    data['latitude']= latitude;
+    data['longitude']= longitude;
+    data['area_id']= areaId;
     return data;
   }
 

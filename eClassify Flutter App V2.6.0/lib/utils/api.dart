@@ -192,6 +192,12 @@ class Api {
   static String languageCode = "language_code";
   static String country = "country";
 
+  // New constants for location fields
+  static const String area = 'area';
+  static const String latitude = 'latitude';
+  static const String longitude = 'longitude';
+  static const String areaId = 'area_id';
+
   static String bathroom = "bathroom";
   static String aboutUs = "about_us";
   static String contactUs = "contact_us";

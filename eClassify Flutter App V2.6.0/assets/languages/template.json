@@ -636,7 +636,9 @@
   "admin": "Admin",
   "jobClosed": "Job Closed",
 
-  "nearbyUsers": "Nearby Users",
-  "noUsersFound": "No Users Found",
-  "noUsersAvailableInThisLocation": "No users available in this location"
+  "nearbyUsers": "Nearby Sellers",
+  "noUsersFound": "No Sellers Found",
+  "noUsersAvailableInThisLocation": "No Sellers available in this location",
+  "selectYourLocation" : "Select Your Shop Location",
+  "changeLocation" : "Select Location Manually"
 }
