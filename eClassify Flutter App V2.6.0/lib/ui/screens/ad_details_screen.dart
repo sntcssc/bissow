@@ -67,6 +67,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+// Subhankar added
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class AdDetailsScreen extends StatefulWidget {
   final ItemModel? model;
@@ -532,7 +534,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       thickness: 1,
                       color: context.color.textDefaultColor
                           .withValues(alpha: 0.1)),
-                  setDescription(),
+                  // setDescription(),
+                  // Subhankar added
+                  setDescription(context, model:model),
                   Divider(
                       thickness: 1,
                       color: context.color.textDefaultColor
@@ -2356,7 +2360,69 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  Widget setDescription() {
+  // Widget setDescription() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     mainAxisSize: MainAxisSize.min,
+  //     children: [
+  //       CustomText(
+  //         "aboutThisItemLbl".translate(context),
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: context.font.large,
+  //       ),
+  //       Padding(
+  //         padding: const EdgeInsets.symmetric(vertical: 5.0),
+  //         child: CustomText(
+  //           model.description!,
+  //           color: context.color.textDefaultColor.withValues(alpha: 0.5),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  // Subhankar added Quil Text editor
+  Widget setDescription(BuildContext context, {required ItemModel model}) {
+    quill.Document document;
+    try {
+      List<dynamic>? jsonData = model.descriptionJson;
+      print('Raw descriptionJson from model: $jsonData'); // Debug raw data
+
+      // If jsonData is null or empty, use fallback
+      if (jsonData == null || jsonData.isEmpty) {
+        jsonData = [{'insert': (model.description ?? 'No description available') + '\n'}];
+      } else {
+        // Ensure jsonData is a valid list of operations
+        if (jsonData.isNotEmpty && jsonData.every((op) => op is Map)) {
+          final lastOp = jsonData.last as Map;
+          if (lastOp.containsKey('insert')) {
+            final lastInsert = lastOp['insert'] as String? ?? '';
+            if (!lastInsert.endsWith('\n')) {
+              lastOp['insert'] = '$lastInsert\n';
+            }
+          } else {
+            jsonData.add({'insert': '\n'});
+          }
+        } else {
+          // If jsonData is malformed, use fallback
+          jsonData = [{'insert': (model.description ?? 'Invalid description format') + '\n'}];
+        }
+      }
+
+      print('Processed descriptionJson: $jsonData'); // Debug processed data
+      document = quill.Document.fromJson(jsonData);
+    } catch (e) {
+      print('Error parsing descriptionJson: $e');
+      document = quill.Document.fromJson([
+        {'insert': (model.description ?? 'Error loading description') + '\n'}
+      ]);
+    }
+
+    final controller = quill.QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    )..readOnly = true;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -2368,14 +2434,37 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5.0),
-          child: CustomText(
-            model.description!,
-            color: context.color.textDefaultColor.withValues(alpha: 0.5),
+          child: SizedBox(
+            width: double.infinity,
+            child: quill.QuillEditor(
+              controller: controller,
+              scrollController: ScrollController(),
+              focusNode: FocusNode(),
+              config: quill.QuillEditorConfig(
+                autoFocus: false,
+                expands: false,
+                padding: const EdgeInsets.all(0),
+                scrollable: true,
+                customStyles: quill.DefaultStyles(
+                  paragraph: quill.DefaultTextBlockStyle(
+                    TextStyle(
+                      color: context.color.textDefaultColor.withValues(alpha: 0.5),
+                      fontSize: context.font.normal,
+                    ),
+                    const quill.HorizontalSpacing(0, 0),
+                    const quill.VerticalSpacing(0, 0),
+                    const quill.VerticalSpacing(0, 0),
+                    const BoxDecoration(),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
+  //./upto here
 
   void _navigateToGoogleMapScreen(BuildContext context) {
     Navigator.push(

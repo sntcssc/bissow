@@ -14,6 +14,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+// Subhankar added
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 void main() => initApp();
 
@@ -104,6 +106,8 @@ class _AppState extends State<App> {
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
+            // Subhankar added for quil rich text editor
+            quill.FlutterQuillLocalizations.delegate,
           ],
           locale: loadLocalLanguageIfFail(languageState),
         );

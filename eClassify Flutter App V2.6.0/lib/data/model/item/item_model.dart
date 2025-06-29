@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/custom_field/custom_field_model.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
@@ -7,6 +9,8 @@ class ItemModel {
   String? name;
   String? slug;
   String? description;
+  // Subhankar Added
+  List<dynamic>? descriptionJson; // New field for rich text JSON
   double? price;
   double? minSalary;
   double? maxSalary;
@@ -78,6 +82,7 @@ class ItemModel {
       this.slug,
       this.category,
       this.description,
+      this.descriptionJson, // Added to constructor for description_json
       this.price,
       this.minSalary,
       this.maxSalary,
@@ -126,6 +131,7 @@ class ItemModel {
       String? name,
       String? slug,
       String? description,
+      List<dynamic>? descriptionJson, // Added to copyWith for description_json
       double? price,
       double? minSalary,
       double? maxSalary,
@@ -171,6 +177,7 @@ class ItemModel {
       slug: slug ?? this.slug,
       category: category ?? this.category,
       description: description ?? this.description,
+      descriptionJson: descriptionJson ?? this.descriptionJson, // Added for description_json
       price: price ?? this.price,
       minSalary: minSalary ?? this.minSalary,
       maxSalary: maxSalary ?? this.maxSalary,
@@ -245,6 +252,19 @@ class ItemModel {
     views = json['clicks'];
     description = json['description'];
 
+    // Decode description_json if it's a String // Added for rich text
+    if (json['description_json'] != null) {
+      if (json['description_json'] is String) {
+        descriptionJson = jsonDecode(json['description_json']) as List<dynamic>;
+      } else if (json['description_json'] is List<dynamic>) {
+        descriptionJson = json['description_json'];
+      } else {
+        descriptionJson = [{'insert': '\n'}]; // Fallback for invalid data
+      }
+    } else {
+      descriptionJson = null; // Or fallback to plain description
+    }
+
     image = json['image'];
     watermarkimage = json['watermark_image'];
     latitude = json['latitude'];
@@ -305,6 +325,8 @@ class ItemModel {
     data['name'] = name;
     data['slug'] = slug;
     data['description'] = description;
+    // Subhankar added
+    data['description_json'] = descriptionJson != null ? jsonEncode(descriptionJson) : null;
     data['price'] = price;
     data['min_salary'] = minSalary;
     data['max_salary'] = maxSalary;

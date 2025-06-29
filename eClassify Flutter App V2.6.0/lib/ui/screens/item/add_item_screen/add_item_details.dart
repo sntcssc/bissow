@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
@@ -24,6 +25,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+
+// Subhankar added
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
 class AddItemDetails extends StatefulWidget {
   final List<CategoryModel>? breadCrumbItems;
@@ -66,13 +71,19 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
   //Text Controllers
   final TextEditingController adTitleController = TextEditingController();
   final TextEditingController adSlugController = TextEditingController();
-  final TextEditingController adDescriptionController = TextEditingController();
+  // final TextEditingController adDescriptionController = TextEditingController();
+  late final quill.QuillController _descriptionController; //Subhankar added
+
   final TextEditingController adPriceController = TextEditingController();
   final TextEditingController adPhoneNumberController = TextEditingController();
   final TextEditingController adAdditionalDetailsController =
       TextEditingController();
   final TextEditingController minSalaryController = TextEditingController();
   final TextEditingController maxSalaryController = TextEditingController();
+
+  // Quill-related - Sybhankar added
+  final FocusNode _descriptionFocusNode = FocusNode();
+  final ScrollController _descriptionScrollController = ScrollController();
 
   void _onBreadCrumbItemTap(int index) {
     int popTimes = (widget.breadCrumbItems!.length - 1) - index;
@@ -98,6 +109,17 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
     _formKey = GlobalKey<FormState>();
     AbstractField.fieldsData.clear();
     AbstractField.files.clear();
+
+    // Subhankar added
+    _descriptionController = quill.QuillController.basic(
+      config: quill.QuillControllerConfig(
+        clipboardConfig: quill.QuillClipboardConfig(
+          enableExternalRichPaste: true,
+        ),
+      ),
+    );
+    // ./upto here
+
     if (widget.isEdit ?? false) {
       item = getCloudData('edit_request') as ItemModel;
       clearCloudData("item_details");
@@ -107,7 +129,16 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
           );
       adTitleController.text = item?.name ?? "";
       adSlugController.text = item?.slug ?? "";
-      adDescriptionController.text = item?.description ?? "";
+      // adDescriptionController.text = item?.description ?? "";
+      // Subhankar added
+      // Check if there's a rich text JSON available, otherwise fallback to plain text
+      if (item?.descriptionJson?.isNotEmpty ?? false) {
+        _descriptionController.document = quill.Document.fromJson(item!.descriptionJson!);
+      } else if (item?.description?.isNotEmpty ?? false) {
+        _descriptionController.document = quill.Document.fromJson(
+            [{'insert': item!.description! + '\n'}]
+        );
+      }
       adPriceController.text = item?.price?.toString() ?? "";
       minSalaryController.text =
           item?.minSalary != null ? item?.minSalary.toString() ?? "" : "";
@@ -185,6 +216,26 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
             widget.breadCrumbItems![0].priceOptional == 1;
   }
 
+  // Subhankar added
+  String? _validateDescription() {
+    final plainText = _descriptionController.document.toPlainText().trim();
+    return plainText.isEmpty ? 'Description cannot be empty' : null;
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _descriptionScrollController.dispose();
+    _descriptionFocusNode.dispose();
+    adTitleController.dispose();
+    adSlugController.dispose();
+    adPriceController.dispose();
+    adPhoneNumberController.dispose();
+    adAdditionalDetailsController.dispose();
+    super.dispose();
+  }
+  // ./upto here
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedSafeArea(
@@ -204,6 +255,20 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
               ///File to
 
               if (_formKey.currentState?.validate() ?? false) {
+                // Subhankar added
+                if (_validateDescription() != null) {
+                  UiUtils.showBlurredDialoge(
+                    context,
+                    dialoge: BlurredDialogBox(
+                      title: "Description Required",
+                      content: CustomText(
+                        "Please enter a description for your item",
+                      ),
+                    ),
+                  );
+                  return;
+                }
+                // ./upto here
                 List<File>? galleryImages = mixedItemImageList
                     .where((element) => element != null && element is File)
                     .map((element) => element as File)
@@ -357,22 +422,138 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                   SizedBox(
                     height: 15,
                   ),
-                  CustomTextFormField(
-                    controller: adDescriptionController,
-
-                    action: TextInputAction.newline,
-                    // controller: _descriptionController,
-                    validator: CustomTextFieldValidator.nullCheck,
-                    capitalization: TextCapitalization.sentences,
-                    hintText: "writeSomething".translate(context),
-                    maxLine: 100,
-                    minLine: 6,
-
-                    hintTextStyle: TextStyle(
-                        color: context.color.textDefaultColor
-                            .withValues(alpha: 0.5),
-                        fontSize: context.font.large),
+                  // CustomTextFormField(
+                  //   controller: adDescriptionController,
+                  //
+                  //   action: TextInputAction.newline,
+                  //   // controller: _descriptionController,
+                  //   validator: CustomTextFieldValidator.nullCheck,
+                  //   capitalization: TextCapitalization.sentences,
+                  //   hintText: "writeSomething".translate(context),
+                  //   maxLine: 100,
+                  //   minLine: 6,
+                  //
+                  //   hintTextStyle: TextStyle(
+                  //       color: context.color.textDefaultColor
+                  //           .withValues(alpha: 0.5),
+                  //       fontSize: context.font.large),
+                  // ),
+                  // Subhankar added
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: context.color.borderColor),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    // child: Column(
+                    //   children: [
+                    //     quill.QuillSimpleToolbar(
+                    //       controller: _descriptionController,
+                    //       config: quill.QuillSimpleToolbarConfig(
+                    //         multiRowsDisplay: false,
+                    //         showAlignmentButtons: false,
+                    //         showBackgroundColorButton: true,
+                    //         showBoldButton: true,
+                    //         showClearFormat: true,
+                    //         showColorButton: true,
+                    //         showFontSize: true,
+                    //         showHeaderStyle: false,
+                    //         showIndent: false,
+                    //         showItalicButton: true,
+                    //         showLink: true,
+                    //         showListBullets: true,
+                    //         showListNumbers: true,
+                    //         showQuote: false,
+                    //         showStrikeThrough: false,
+                    //         showUnderLineButton: true,
+                    //         // embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+                    //         buttonOptions: quill.QuillSimpleToolbarButtonOptions(
+                    //           base: quill.QuillToolbarBaseButtonOptions(
+                    //             afterButtonPressed: _descriptionFocusNode.requestFocus,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     Divider(height: 1, color: context.color.borderColor),
+                    //     SizedBox(
+                    //       height: 200,
+                    //       child: quill.QuillEditor(
+                    //         controller: _descriptionController,
+                    //         focusNode: _descriptionFocusNode,
+                    //         scrollController: _descriptionScrollController,
+                    //         config: quill.QuillEditorConfig(
+                    //           placeholder: "writeSomething".translate(context),
+                    //           padding: const EdgeInsets.all(8),
+                    //           embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                    //           customStyles: quill.DefaultStyles(
+                    //             // placeHolder: TextStyle(
+                    //             //   color: context.color.textDefaultColor.withValues(alpha: 0.5),
+                    //             //   fontSize: context.font.large,
+                    //             // ),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    child: Column(
+                      children: [
+                        quill.QuillSimpleToolbar(
+                          controller: _descriptionController,
+                          config: quill.QuillSimpleToolbarConfig(
+                            multiRowsDisplay: false,
+                            showAlignmentButtons: false,
+                            showBackgroundColorButton: true,
+                            showBoldButton: true,
+                            showClearFormat: true,
+                            showColorButton: true,
+                            showFontSize: true,
+                            showHeaderStyle: false,
+                            showIndent: false,
+                            showItalicButton: true,
+                            showLink: true,
+                            showListBullets: true,
+                            showListNumbers: true,
+                            showQuote: false,
+                            showStrikeThrough: false,
+                            showUnderLineButton: true,
+                            buttonOptions: quill.QuillSimpleToolbarButtonOptions(
+                              base: quill.QuillToolbarBaseButtonOptions(
+                                afterButtonPressed: _descriptionFocusNode.requestFocus,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Divider(height: 1, color: context.color.borderColor),
+                        SizedBox(
+                          height: 200,
+                          child: TextSelectionTheme(
+                            data: TextSelectionThemeData(
+                              selectionColor: Colors.blue.withOpacity(0.4), // Custom selection color with opacity
+                              selectionHandleColor: Colors.blue, // Custom handle color
+                              cursorColor: Colors.blue, // Optional: Custom cursor color
+                            ),
+                            child: quill.QuillEditor(
+                              controller: _descriptionController,
+                              focusNode: _descriptionFocusNode,
+                              scrollController: _descriptionScrollController,
+                              config: quill.QuillEditorConfig(
+                                placeholder: "writeSomething".translate(context),
+                                padding: const EdgeInsets.all(8),
+                                embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                                customStyles: quill.DefaultStyles(
+                                  // placeHolder: TextStyle(
+                                  //   color: context.color.textDefaultColor.withValues(alpha: 0.5),
+                                  //   fontSize: context.font.large,
+                                  // ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  // ./upto here
                   SizedBox(
                     height: 15,
                   ),
@@ -848,10 +1029,26 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
   }
 
   void addDataToCloud(String key) {
+
+    final descriptionJson = _descriptionController.document.toDelta().toJson();
+    final descriptionPlain = _descriptionController.document.toPlainText().trim();
+    // Encode descriptionJson as a string
+    final descriptionJsonString = jsonEncode(descriptionJson);
+    // print(_descriptionController.document.toDelta().toJson());
+
+    // Determine the value for description_json based on the key
+    final descriptionJsonValue = (key == 'item_details')
+        ? descriptionJsonString // Use encoded string
+        : descriptionJson;
+
     addCloudData(key, {
       "name": adTitleController.text,
       "slug": adSlugController.text,
-      "description": adDescriptionController.text,
+      // "description": adDescriptionController.text,
+      // Subhankar added
+      "description": descriptionPlain,
+      "description_json": descriptionJsonValue,
+      // ./upto here
       if (widget.isEdit != true) "category_id": selectedCategoryList.last,
       if (widget.isEdit ?? false) "id": item?.id,
       "price": adPriceController.text,
