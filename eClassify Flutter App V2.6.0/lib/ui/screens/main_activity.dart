@@ -35,6 +35,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:animate_do/animate_do.dart'; // Added for FAB animation
+
 List<ItemModel> myItemList = [];
 Map<String, dynamic> searchBody = {};
 String selectedCategoryId = "0";
@@ -302,10 +304,46 @@ class MainActivityState extends State<MainActivity>
             return;
           }
         },
+        // child: Scaffold(
+        //   backgroundColor: context.color.primaryColor,
+        //   bottomNavigationBar:
+        //       Constant.maintenanceMode == "1" ? null : bottomBar(),
+        //   body: Stack(
+        //     children: <Widget>[
+        //       PageView(
+        //         physics: const NeverScrollableScrollPhysics(),
+        //         controller: pageController,
+        //         //onPageChanged: onItemSwipe,
+        //         children: pages,
+        //       ),
+        //       if (Constant.maintenanceMode == "1") MaintenanceMode()
+        //     ],
+        //   ),
+        // ),
+      //   Subhankar added
         child: Scaffold(
           backgroundColor: context.color.primaryColor,
           bottomNavigationBar:
-              Constant.maintenanceMode == "1" ? null : bottomBar(),
+          Constant.maintenanceMode == "1" ? null : bottomBar(),
+          floatingActionButton: Constant.maintenanceMode == "1"
+              ? null
+              : FadeIn(
+            duration: Duration(milliseconds: 500),
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.qrCodeScannerScreen);
+              },
+              child: Icon(
+                Icons.qr_code_scanner,
+                color: context.color.secondaryColor,
+              ),
+              backgroundColor: context.color.territoryColor,
+              elevation: 6,
+              tooltip: "scanQRCode".translate(context),
+            ),
+          ),
+          floatingActionButtonLocation:
+          FloatingActionButtonLocation.endFloat, // Position FAB to avoid overlap
           body: Stack(
             children: <Widget>[
               PageView(

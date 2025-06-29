@@ -24,6 +24,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+// Subhankar added
+import 'package:animate_do/animate_do.dart';
 
 class SellerProfileScreen extends StatefulWidget {
   final int sellerId;
@@ -122,10 +124,62 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                   headerSliverBuilder: (context, innerBoxIsScrolled) => [
                     SliverAppBar(
                       actions: [
+                        // IconButton(
+                        //   onPressed: () {
+                        //     HelperUtils.shareItem(
+                        //         context, "seller", widget.sellerId.toString());
+                        //   },
+                        //   icon: Icon(
+                        //     Icons.share,
+                        //     size: 24,
+                        //     color: context.color.textDefaultColor,
+                        //   ),
+                        // ),
                         IconButton(
                           onPressed: () {
-                            HelperUtils.shareItem(
-                                context, "seller", widget.sellerId.toString());
+                            showModalBottomSheet(
+                              context: context,
+                              backgroundColor: context.color.backgroundColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (context) {
+                                return FadeInUp(
+                                  duration: Duration(milliseconds: 300),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(Icons.qr_code_2, color: context.color.territoryColor),
+                                        title: Text("generateQRCode".translate(context)),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          Navigator.pushNamed(
+                                            context,
+                                            Routes.qrCodeGenerateScreen,
+                                            arguments: {
+                                              'sellerId': widget.sellerId,
+                                              'sellerName': state.seller!.name ?? "Unknown Seller",
+                                              'sellerPhone': state.seller!.mobile,
+                                              'profilePicture': state.seller!.profile,
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      ListTile(
+                                        leading: Icon(Icons.share, color: context.color.territoryColor),
+                                        title: Text("share".translate(context)),
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          HelperUtils.shareItem(context, "seller", widget.sellerId.toString());
+                                        },
+                                      ),
+                                      SizedBox(height: 20),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
                           },
                           icon: Icon(
                             Icons.share,
@@ -142,6 +196,9 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                           onTap: () {
                             Navigator.pop(context);
                           },
+
+                          // Todo: Subhankar added for handle the case where you want to navigate to the main screen only when there's no back navigation available
+
                           child: Padding(
                             padding: const EdgeInsets.all(18.0),
                             child: Directionality(

@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   device_region
   file_selector_linux
+  printing
   record_linux
   url_launcher_linux
 )

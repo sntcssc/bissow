@@ -38,6 +38,8 @@ import 'package:eClassify/ui/screens/location_permission_screen.dart';
 import 'package:eClassify/ui/screens/main_activity.dart';
 import 'package:eClassify/ui/screens/my_review_screen.dart';
 import 'package:eClassify/ui/screens/onboarding/onboarding_screen.dart';
+import 'package:eClassify/ui/screens/seller/qr_code_generate_screen.dart';
+import 'package:eClassify/ui/screens/seller/qr_code_scanner_screen.dart';
 import 'package:eClassify/ui/screens/seller/seller_intro_verification.dart';
 import 'package:eClassify/ui/screens/seller/seller_profile.dart';
 import 'package:eClassify/ui/screens/seller/seller_verification.dart';
@@ -140,6 +142,8 @@ class Routes {
   static const jobApplicationList = '/jobApplicationList';
   // Subhankar added
   static const nearbyUsersScreen = '/nearbyUsersScreen';
+  static const qrCodeGenerateScreen = '/qrCodeGenerateScreen';
+  static const qrCodeScannerScreen = '/qrCodeScannerScreen';
 
   static const playground = 'playground';
 
@@ -314,6 +318,10 @@ class Routes {
       //   Subhankar added
       case nearbyUsersScreen: // New route case
         return NearbyUsersScreen.route(routeSettings);
+      case qrCodeGenerateScreen:
+        return QRCodeGenerateScreen.route(routeSettings);
+      case qrCodeScannerScreen:
+        return QRCodeScannerScreen.route(routeSettings);
 
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());

@@ -17,6 +17,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Subhankar added QR code save purpose -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
@@ -77,6 +81,29 @@
             <meta-data
                 android:name="flutter_deeplinking_enabled"
                 android:value="true" />
+
+            <!-- Subhankar Added-->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="bissow.com" />
+            </intent-filter>
+            <!-- Deep link intent filter : Subhankar Added -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="bissow.com"
+                    android:pathPrefix="/product-details/" />
+                <data
+                    android:scheme="https"
+                    android:host="bissow.com"
+                    android:pathPrefix="/seller/" />
+            </intent-filter>
+            <!--  ./ Upto here-->
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
