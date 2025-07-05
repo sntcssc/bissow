@@ -37,12 +37,12 @@
   "completeLbl": "Complete",
   "convert": "Convert",
   "maintenanceModeMessage": "Sorry, we are currently undergoing maintenance. Please try again later.",
-  "addMainPicture": "Add Main Picture",
+  "addMainPicture": "Add Thumbnail Picture",
   "add360degPicture": "Add 360 Degree Picture",
   "howCanWeHelp": "How can we help you?",
   "itLooksLikeYouHasError": "It Look likes you have problems with our systems. we are here to help you, so, please get in touch with us.",
   "uploadPictures": "Upload Pictures",
-  "addOtherPicture": "Add Other Pictures",
+  "addOtherPicture": "Add Sample Pictures",
   "price": "Price",
   "paypal": "Paypal",
   "purchaseFailed": "Purchase package failed",
@@ -670,7 +670,7 @@
   "cameraPermissionRequired" : "To Scan the QR code Camera access permission require",
   "cameraPermissionDenied" : "Camera access permission denied by the user",
   "invalidQRCode" : "This QR code is not valid for Bissow.com",
-  "errorValidatingQR" : "This QR code is not Valid for Bissow.com as responded by Server!"
-
-
+  "errorValidatingQR" : "This QR code is not Valid for Bissow.com as responded by Server!",
+  "generateQRCode" : "View Seller QR code",
+  "copyLink": "Copy link"
 }

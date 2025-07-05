@@ -199,6 +199,10 @@ class Api {
   static const String areaId = 'area_id';
   // For QR code
   static const String validateSellerQRApi = "validate-seller-qr";
+  // 2025.04.03 - Subhankar added for item discount entry
+  static String createItemDiscountApi = "items-discounts";
+  static String updateItemDiscountApi = "items-discounts";
+  static String toggleDiscountActiveApi = "items-discounts";
 
   static String bathroom = "bathroom";
   static String aboutUs = "about_us";

@@ -82,6 +82,8 @@ dependencies:
   flutter_quill: ^11.4.1
   flutter_quill_extensions: ^11.0.0
   app_links: ^6.4.0
+  # 2025.04.03 - Subhankar added for item discount entry: intl for dateformat
+  intl: ^0.20.2
 
 
 

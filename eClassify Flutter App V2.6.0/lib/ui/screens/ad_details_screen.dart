@@ -69,6 +69,12 @@ import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 // Subhankar added
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:eClassify/ui/screens/item/add_discount_from_menu_screen.dart';
+import 'package:eClassify/ui/screens/item/discount_form_widget.dart';
+import 'package:eClassify/ui/screens/widgets/animated_routes/blur_page_route.dart';
+import 'package:eClassify/ui/screens/widgets/discounted_timer_widgets.dart';
+import 'package:eClassify/data/cubits/item/Item_discount_cubit.dart';
+import 'package:eClassify/data/repositories/item/item_repository.dart';
 
 class AdDetailsScreen extends StatefulWidget {
   final ItemModel? model;
@@ -444,6 +450,19 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                         }
                                       },
                                     ),
+                                  //   Subhankar added for Item Discount
+                                  PopupMenuItem(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => const AddDiscountFromMenuScreen()),
+                                        );
+                                      },
+                                      child: CustomText(
+                                        "Manage Discount Items".translate(context),
+                                        color: context.color.buttonColor,
+                                      )),
+                                  //   ./upto here
                                 ],
                               ),
                             ),
@@ -527,6 +546,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   ),
                   if (isAddedByMe)
                     if (!model.isFeature!) createFeaturesAds(),
+                    // 2025.04.03 - Subhankar added for item discount entry
+                  if (isAddedByMe) addDiscountButton(model, () => setState(() {})),
                   if (model.customFields!.isNotEmpty) customFields(),
                   //detailsContainer Widget
                   //Dynamic Ads here
@@ -2233,31 +2254,123 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
+  // Widget setPriceAndStatus() {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Expanded(
+  //         child: Padding(
+  //             padding: const EdgeInsets.symmetric(vertical: 5),
+  //             child: UiUtils.getPriceWidget(model, context)),
+  //       ),
+  //       if (model.status != null && isAddedByMe)
+  //         Container(
+  //           padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+  //           decoration: BoxDecoration(
+  //             borderRadius: BorderRadius.circular(20),
+  //             color: _getStatusColor(model.status),
+  //           ),
+  //           child: CustomText(
+  //             _getStatusCustomText(model.status)!,
+  //             fontSize: context.font.normal,
+  //             color: _getStatusTextColor(model.status),
+  //           ),
+  //         )
+  //     ],
+  //   );
+  // }
+
+  // Subhankar added for item discount
   Widget setPriceAndStatus() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: UiUtils.getPriceWidget(model, context)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Price and Discount Section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (model.discountDetails != null) ...[
+                        // Original Price with Strikethrough
+                        CustomText(
+                          (model.originalPrice ?? 0.0).currencyFormat,
+                          fontSize: context.font.large,
+                          color: context.color.textLightColor,
+                          showLineThrough: true,
+                        ),
+                        const SizedBox(width: 8),
+                        // Discounted Price
+                        CustomText(
+                          (model.price ?? 0.0).currencyFormat,
+                          fontSize: context.font.larger,
+                          color: context.color.territoryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ] else ...[
+                        // Regular Price (No Discount)
+                        CustomText(
+                          (model.price ?? 0.0).currencyFormat,
+                          fontSize: context.font.larger,
+                          color: context.color.territoryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ],
+                      // Discount Badge
+                      if (model.discountDetails != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: CustomText(
+                            model.discountDetails!.discountType == 'percentage'
+                                ? "${model.discountDetails!.discountValue}% OFF"
+                                : "- ${(model.discountDetails!.discountValue).currencyFormat}",
+                            fontSize: context.font.smaller,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  // Discount Timer (if discount exists)
+                  if (model.discountDetails != null &&
+                      model.discountDetails!.endDate != null) ...[
+                    const SizedBox(height: 4),
+                    DiscountTimer(endDate: model.discountDetails!.endDate!),
+                  ],
+                ],
+              ),
+            ),
+            // Status Badge (if applicable)
+            if (model.status != null && isAddedByMe)
+              Container(
+                padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: _getStatusColor(model.status),
+                ),
+                child: CustomText(
+                  _getStatusCustomText(model.status)!,
+                  fontSize: context.font.small,
+                  color: _getStatusTextColor(model.status),
+                ),
+              ),
+          ],
         ),
-        if (model.status != null && isAddedByMe)
-          Container(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: _getStatusColor(model.status),
-            ),
-            child: CustomText(
-              _getStatusCustomText(model.status)!,
-              fontSize: context.font.normal,
-              color: _getStatusTextColor(model.status),
-            ),
-          )
       ],
     );
   }
+  // ./upto here
 
   String? _getStatusCustomText(String? status) {
     switch (status) {
@@ -3102,4 +3215,169 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
       );
     });
   }
+
+  //   2025.04.03 - Subhankar added for item discount entry
+
+  Widget addDiscountButton(ItemModel model, Function() refresh) {
+    return BlocProvider(
+      create: (context) => ItemDiscountCubit(ItemRepository()),
+      child: Builder(builder: (context) {
+        return BlocListener<ItemDiscountCubit, ItemDiscountState>(
+          listener: (context, state) {
+            if (state is ItemDiscountSuccess) {
+              HelperUtils.showSnackBarMessage(context, state.message, messageDuration: 3);
+              refresh();
+            } else if (state is ItemDiscountFailure) {
+              HelperUtils.showSnackBarMessage(context, state.error, messageDuration: 3);
+            }
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10.0,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Add Discount for This Item".translate(context),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    if (model.discountDetails != null)
+                      Chip(
+                        label: Text(
+                          model.discountDetails!.isActive ? "Active".translate(context) : "Inactive".translate(context),
+                        ),
+                        backgroundColor: model.discountDetails!.isActive
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
+                        labelStyle: TextStyle(
+                          color: model.discountDetails!.isActive ? Colors.green : Colors.red,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12.0),
+                if (model.discountDetails != null) ...[
+                  Text(
+                    "Discount: ${model.discountDetails!.discountValue} ${model.discountDetails!.discountType == 'percentage' ? '%' : ''}",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.green),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Text(
+                        "Original: ${model.originalPrice}",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        "Now: ${model.price}",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => DiscountFormWidget(
+                              discountId: model.discountDetails!.id,
+                              existingDiscount: model.discountDetails!.toJson(),
+                              items: [model],
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.edit, size: 20),
+                        label: Text("Edit".translate(context)),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          print('Toggling discount for ID: ${model.discountDetails!.id}');
+                          context.read<ItemDiscountCubit>().toggleDiscountActive(discountId: model.discountDetails!.id);
+                          HelperUtils.killPreviousPages(
+                              context, Routes.main, {"from": "login"});
+                        },
+                        icon: Icon(
+                          model.discountDetails!.isActive ? Icons.toggle_off : Icons.toggle_on,
+                          size: 20,
+                        ),
+                        label: Text(
+                          model.discountDetails!.isActive ? "Deactivate".translate(context) : "Activate".translate(context),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                          backgroundColor: model.discountDetails!.isActive ? Colors.redAccent : Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Text(
+                    "Price: ${model.originalPrice}".translate(context),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 20.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => DiscountFormWidget(
+                            itemIds: [model.id!],
+                            items: [model],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.discount_outlined, size: 20),
+                      label: Text("Add Discount".translate(context)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        elevation: 2.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+//   ./upto here
 }

@@ -11,6 +11,9 @@ class ItemModel {
   String? description;
   // Subhankar Added
   List<dynamic>? descriptionJson; // New field for rich text JSON
+  double? originalPrice; // New: Original price before discount - Original price from active_discount
+  DiscountDetails? discountDetails; // New: Discount details Mapped from active_discount
+  //upto here
   double? price;
   double? minSalary;
   double? maxSalary;
@@ -83,6 +86,8 @@ class ItemModel {
       this.category,
       this.description,
       this.descriptionJson, // Added to constructor for description_json
+      this.originalPrice, // New added for Item Discount
+      this.discountDetails, // New added for Item Discount
       this.price,
       this.minSalary,
       this.maxSalary,
@@ -132,6 +137,8 @@ class ItemModel {
       String? slug,
       String? description,
       List<dynamic>? descriptionJson, // Added to copyWith for description_json
+      double? originalPrice, // New added for item discount
+      DiscountDetails? discountDetails, // New added for item discount
       double? price,
       double? minSalary,
       double? maxSalary,
@@ -178,6 +185,8 @@ class ItemModel {
       category: category ?? this.category,
       description: description ?? this.description,
       descriptionJson: descriptionJson ?? this.descriptionJson, // Added for description_json
+      originalPrice: originalPrice ?? this.originalPrice, // New added for item discount
+      discountDetails: discountDetails ?? this.discountDetails, // New added for item discount
       price: price ?? this.price,
       minSalary: minSalary ?? this.minSalary,
       maxSalary: maxSalary ?? this.maxSalary,
@@ -231,6 +240,19 @@ class ItemModel {
     } else {
       price = json['price'];
     }
+
+    // Subhakar added for item discount
+    // Handle active_discount
+    if (json['active_discount'] != null) {
+      print("Active Discount: ${json['active_discount']}");
+      discountDetails = DiscountDetails.fromJson(json['active_discount']);
+      originalPrice = discountDetails!.originalPrice;
+    } else {
+      discountDetails = null;
+      originalPrice = json['price'] is int ? (json['price'] as int).toDouble() : json['price'];
+    }
+    // Subhankar added
+
     if (json['min_salary'] is int) {
       minSalary = (json['min_salary'] as int).toDouble();
     } else {
@@ -385,9 +407,75 @@ class ItemModel {
 
   @override
   String toString() {
-    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,isAlreadyOffered:$isAlreadyOffered,isAlreadyJobApplied:$isAlreadyJobApplied,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review,minSalary:$minSalary,maxSalary:$maxSalary,isEditedByAdmin: $isEditedByAdmin,adminEditReason:$adminEditReason}';
+    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, originalPrice: $originalPrice, discountDetails: $discountDetails, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,isAlreadyOffered:$isAlreadyOffered,isAlreadyJobApplied:$isAlreadyJobApplied,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review,minSalary:$minSalary,maxSalary:$maxSalary,isEditedByAdmin: $isEditedByAdmin,adminEditReason:$adminEditReason}';
   }
 }
+
+
+// Subhankar added for item discount
+class DiscountDetails {
+  final int id;
+  final int itemId;
+  final double originalPrice;
+  final double discountValue;
+  final String discountType;
+  final double discountedPrice;
+  final String? startDate;
+  final String? endDate;
+  final String? discountSource;
+  final bool isActive;
+
+  DiscountDetails({
+    required this.id,
+    required this.itemId,
+    required this.originalPrice,
+    required this.discountValue,
+    required this.discountType,
+    required this.discountedPrice,
+    this.startDate,
+    this.endDate,
+    this.discountSource,
+    required this.isActive,
+  });
+
+  factory DiscountDetails.fromJson(Map<String, dynamic> json) {
+    return DiscountDetails(
+      id: json['id'] as int,
+      itemId: json['item_id'] as int,
+      originalPrice: (json['original_price'] is int)
+          ? (json['original_price'] as int).toDouble()
+          : json['original_price'] as double,
+      discountValue: (json['discount_value'] is int)
+          ? (json['discount_value'] as int).toDouble()
+          : json['discount_value'] as double,
+      discountType: json['discount_type'] as String,
+      discountedPrice: (json['discounted_price'] is int)
+          ? (json['discounted_price'] as int).toDouble()
+          : json['discounted_price'] as double,
+      startDate: json['start_date'] as String?,
+      endDate: json['end_date'] as String?,
+      discountSource: json['discount_source'] as String?,
+      isActive: json['is_active'] as bool,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'item_id': itemId,
+      'original_price': originalPrice,
+      'discount_value': discountValue,
+      'discount_type': discountType,
+      'discounted_price': discountedPrice,
+      'start_date': startDate,
+      'end_date': endDate,
+      'discount_source': discountSource,
+      'is_active': isActive,
+    };
+  }
+}
+
+// upto here
 
 class User {
   int? id;

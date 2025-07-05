@@ -313,4 +313,78 @@ class ItemRepository {
 
     return DataOutput(total: response['data']['total'] ?? 0, modelList: items);
   }
+
+  //    2025.04.03 - Subhankar added for item discount entry
+
+  Future<Map> createItemDiscount({
+    required List<int> itemIds,
+    required double discountValue,
+    required String discountType,
+    required DateTime startDate,
+    DateTime? endDate,
+    String? discountSource,
+  }) async {
+    try {
+      final response = await Api.post(
+        url: Api.createItemDiscountApi,
+        parameter: {
+          'items': itemIds.map((id) => {'item_id': id}).toList(),
+          'discount_value': discountValue,
+          'discount_type': discountType,
+          'start_date': startDate.toIso8601String(),
+          if (endDate != null) 'end_date': endDate.toIso8601String(),
+          if (discountSource != null) 'discount_source': discountSource,
+        },
+      );
+      print('Create Discount Response: $response');
+      return response;
+    } catch (e) {
+      print('Create Discount Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map> updateItemDiscount({
+    required int discountId,
+    required double discountValue,
+    required String discountType,
+    required DateTime startDate,
+    DateTime? endDate,
+  }) async {
+    try {
+      final response = await Api.post(
+        url: "${Api.updateItemDiscountApi}/$discountId",
+        parameter: {
+          'discount_value': discountValue,
+          'discount_type': discountType,
+          'start_date': startDate.toIso8601String(),
+          if (endDate != null) 'end_date': endDate.toIso8601String(),
+        },
+      );
+      print('Update Discount Response: $response');
+      return response;
+    } catch (e) {
+      print('Update Discount Error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map> toggleDiscountActive({
+    required int discountId,
+  }) async {
+    try {
+      final response = await Api.post(
+        url: "${Api.toggleDiscountActiveApi}/$discountId/toggle-active",
+        parameter: {
+          'discount_value': discountId,
+        }, // No body required for PATCH in this case
+      );
+      print('Toggle Discount Response: $response');
+      return response;
+    } catch (e) {
+      print('Toggle Discount Error: $e');
+      rethrow;
+    }
+  }
+//   ./upto here
 }

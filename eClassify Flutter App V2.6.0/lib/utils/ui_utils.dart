@@ -700,6 +700,74 @@ class UiUtils {
     }
   }
 
+  // static Widget getPriceWidget(ItemModel item, BuildContext context) {
+  //   final category = item.category;
+  //   final color = context.color.territoryColor;
+  //
+  //   if (category == null) return SizedBox.shrink();
+  //
+  //   if (category.isJobCategory == 1) {
+  //     final min = item.minSalary;
+  //     final max = item.maxSalary;
+  //
+  //     if (min != null && max != null) {
+  //       return CustomText(
+  //         '${min.currencyFormat} - ${max.currencyFormat}',
+  //         color: color,
+  //         fontWeight: FontWeight.bold,
+  //         softWrap: true,
+  //         overflow: TextOverflow.ellipsis,
+  //         maxLines: 1,
+  //       );
+  //     } else if (min != null) {
+  //       return CustomText(
+  //         "${"from".translate(context)}\t${min.currencyFormat}",
+  //         color: color,
+  //         fontWeight: FontWeight.bold,
+  //         softWrap: true,
+  //         overflow: TextOverflow.ellipsis,
+  //         maxLines: 1,
+  //       );
+  //     } else if (max != null) {
+  //       return CustomText(
+  //         "${"up_to".translate(context)}\t${max.currencyFormat}",
+  //         color: color,
+  //         fontWeight: FontWeight.bold,
+  //         softWrap: true,
+  //         overflow: TextOverflow.ellipsis,
+  //         maxLines: 1,
+  //       );
+  //     }
+  //   } else if (category.priceOptional == 1) {
+  //     if (item.price != null) {
+  //       return CustomText(
+  //         item.price!.currencyFormat,
+  //         color: color,
+  //         fontWeight: FontWeight.bold,
+  //         softWrap: true,
+  //         overflow: TextOverflow.ellipsis,
+  //         maxLines: 1,
+  //       );
+  //     }
+  //   } else {
+  //     return CustomText(
+  //       (item.price ?? 0.0).currencyFormat,
+  //       color: color,
+  //       fontWeight: FontWeight.bold,
+  //       softWrap: true,
+  //       overflow: TextOverflow.ellipsis,
+  //       maxLines: 1,
+  //     );
+  //   }
+  //
+  //   return SizedBox.shrink();
+  // }
+
+  // Added on 02.07.2025
+  // To reflect the discounted price with the original price crossed out (strikethrough) when a discount is available
+  // If there's a discount, both the original price with a strikethrough and the discounted price are displayed.
+  // If there’s no discount, just the regular price is shown.
+
   static Widget getPriceWidget(ItemModel item, BuildContext context) {
     final category = item.category;
     final color = context.color.territoryColor;
@@ -750,18 +818,49 @@ class UiUtils {
         );
       }
     } else {
-      return CustomText(
-        (item.price ?? 0.0).currencyFormat,
-        color: color,
-        fontWeight: FontWeight.bold,
-        softWrap: true,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      );
+      // Check if item has a discount and display accordingly
+      if (item?.discountDetails != null) {
+        // Original price with strikethrough
+        return Row(
+          children: [
+            CustomText(
+              (item!.originalPrice ?? 0.0).currencyFormat,
+              fontSize: context.font.smaller,
+              color: context.color.textLightColor,
+              showLineThrough: true,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            const SizedBox(width: 8),
+            // Discounted price
+            CustomText(
+              (item!.price ?? 0.0).currencyFormat,
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
+              fontSize: context.font.large,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ],
+        );
+      } else {
+        // Regular price (No Discount)
+        return CustomText(
+          (item.price ?? 0.0).currencyFormat,
+          color: color,
+          fontWeight: FontWeight.bold,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        );
+      }
     }
 
     return SizedBox.shrink();
   }
+
 }
 
 ///Format string
