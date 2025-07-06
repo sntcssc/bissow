@@ -8,6 +8,10 @@ import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pro_image_editor/core/models/editor_callbacks/pro_image_editor_callbacks.dart';
+import 'dart:typed_data';
+
+import 'package:pro_image_editor/features/main_editor/main_editor.dart';
 
 class PickImage {
   final ImagePicker _picker = ImagePicker();
@@ -25,39 +29,49 @@ class PickImage {
     _pickedFile = pickedFile;
   }
 
-
-  Future<void> pick(
-      {ImageSource? source,
-      bool? pickMultiple,
-      int? imageLimit,
-      int? maxLength,
-      required BuildContext context}) async {
+  /// Pick image(s) with optional editing
+  Future<void> pick({
+    ImageSource? source,
+    bool? pickMultiple,
+    int? imageLimit,
+    int? maxLength,
+    required BuildContext context,
+    bool enableEditing = false, // Parameter for enabling editing
+  }) async {
     try {
       if (pickMultiple ?? false) {
         List<XFile> list = await _picker.pickMultiImage(
-            imageQuality: Constant.uploadImageQuality,
-            requestFullMetadata: true);
+          imageQuality: Constant.uploadImageQuality,
+          requestFullMetadata: true,
+        );
 
         if (imageLimit != null &&
             maxLength != null &&
             (list.length + maxLength) > imageLimit) {
           HelperUtils.showSnackBarMessage(
-              context, "max5ImagesAllowed".translate(context));
+            context,
+            "max5ImagesAllowed".translate(context),
+          );
           return;
         } else {
-          Iterable<Future<File>> result = list.map((image) async {
-            File myImage = File(image.path);
+          List<File> templistFile = [];
+          for (var image in list) {
+            File? myImage = File(image.path);
+
+            // Apply editing if enabled
+            if (enableEditing) {
+              myImage = await _editImage(context, myImage);
+              if (myImage == null) {
+                // User canceled editing
+                continue;
+              }
+            }
+
+            // Compress if necessary
             if (await myImage.length() > Constant.maxSizeInBytes) {
               myImage = await HelperUtils.compressImageFile(myImage);
-            } else {
-              myImage = File(image.path);
             }
-            return myImage;
-          });
-          List<File> templistFile = [];
-          await for (Future<File> futureFile in Stream.fromIterable(result)) {
-            File file = await futureFile;
-            templistFile.add(file);
+            templistFile.add(myImage);
           }
 
           _sink.add({
@@ -72,8 +86,22 @@ class PickImage {
           preferredCameraDevice: CameraDevice.rear,
         );
         if (pickedFile != null) {
-          File file = File(pickedFile.path);
+          File? file = File(pickedFile.path);
 
+          // Apply editing if enabled
+          if (enableEditing) {
+            file = await _editImage(context, file);
+            if (file == null) {
+              // User canceled editing
+              _sink.add({
+                "error": "Editing canceled",
+                "file": [],
+              });
+              return;
+            }
+          }
+
+          // Compress if necessary
           if (await file.length() > Constant.maxSizeInBytes) {
             file = await HelperUtils.compressImageFile(file);
           }
@@ -92,13 +120,49 @@ class PickImage {
     }
   }
 
-  /// This widget will listen changes in ui, it is wrapper around Stream builder
+  /// Helper method to edit an image using pro_image_editor
+  Future<File?> _editImage(BuildContext context, File image) async {
+    try {
+      // Open the pro_image_editor with the image file
+      final Uint8List? editedImageData = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProImageEditor.file(
+            image,
+            callbacks: ProImageEditorCallbacks(
+              onImageEditingComplete: (Uint8List bytes) async {
+                Navigator.pop(context, bytes); // Return edited image data
+              },
+              // onCloseEditor: (editorMode) {
+              //   Navigator.pop(context, null); // Return null if editor is closed without saving
+              // },
+            ),
+            // Optional: Customize editor settings
+          ),
+        ),
+      );
+
+      if (editedImageData != null) {
+        // Save edited image to a temporary file
+        final tempDir = Directory.systemTemp;
+        final tempFile = File('${tempDir.path}/edited_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
+        await tempFile.writeAsBytes(editedImageData);
+        return tempFile;
+      }
+      return null; // Return null if editing is canceled
+    } catch (e) {
+      HelperUtils.showSnackBarMessage(context, "Error editing image: $e");
+      return null;
+    }
+  }
+
+  /// This widget will listen changes in UI, it is wrapper around Stream builder
   Widget listenChangesInUI(
-    dynamic Function(
-      BuildContext context,
-      List<File>? images,
-    ) ondata,
-  ) {
+      dynamic Function(
+          BuildContext context,
+          List<File>? images,
+          ) ondata,
+      ) {
     return StreamBuilder(
       stream: imageStream,
       builder: ((context, AsyncSnapshot snapshot) {

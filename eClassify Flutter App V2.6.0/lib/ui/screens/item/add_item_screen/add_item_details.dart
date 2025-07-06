@@ -788,6 +788,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       pickMultiple: false,
                       context: context,
                       source: source,
+                      enableEditing: true, // Enable image editing
                     );
                     _pickTitleImage.pauseSubscription();
                     titleImageURL = "";
@@ -826,6 +827,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                   pickMultiple: false,
                   context: context,
                   source: source,
+                  enableEditing: true, // Enable image editing
                 );
                 _pickTitleImage.pauseSubscription();
                 titleImageURL = "";
@@ -906,7 +908,9 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         context: context,
                         imageLimit: 5,
                         maxLength: mixedItemImageList.length,
-                        source: source);
+                        source: source,
+                        enableEditing: true, // Enable image editing
+                    );
                   });
                 },
                 child: Container(
@@ -932,7 +936,9 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       context: context,
                       imageLimit: 5,
                       maxLength: mixedItemImageList.length,
-                      source: source);
+                      source: source,
+                      enableEditing: true, // Enable image editing
+                  );
                 });
               })
         ],

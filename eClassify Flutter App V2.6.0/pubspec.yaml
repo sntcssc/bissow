@@ -84,6 +84,9 @@ dependencies:
   app_links: ^6.4.0
   # 2025.04.03 - Subhankar added for item discount entry: intl for dateformat
   intl: ^0.20.2
+  # for whatsapp like image edit
+  pro_image_editor: ^10.2.3
+  google_fonts: ^6.2.1
 
 
 
