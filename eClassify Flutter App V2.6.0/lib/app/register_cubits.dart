@@ -74,6 +74,10 @@ import 'package:eClassify/data/cubits/utility/item_edit_global.dart';
 import 'package:eClassify/data/repositories/favourites_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nested/nested.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_marquee_messages_cubit.dart';
+import 'package:eClassify/data/cubits/marquee/delete_marquee_message_cubit.dart';
+import 'package:eClassify/data/cubits/marquee/fetch_my_marquee_messages_cubit.dart';
+import 'package:eClassify/data/cubits/marquee/manage_marquee_message_cubit.dart';
 
 class RegisterCubits {
   List<SingleChildWidget> providers = [
@@ -155,5 +159,9 @@ class RegisterCubits {
     BlocProvider(
       create: (context) => FetchJobApplicationCubit(),
     ),
+    BlocProvider(create: (context) => FetchHomeAllMarqueeMessagesCubit()),
+    BlocProvider(create: (context) => FetchMyMarqueeMessagesCubit()),
+    BlocProvider(create: (context) => ManageMarqueeMessageCubit()),
+    BlocProvider(create: (context) => DeleteMarqueeMessageCubit()),
   ];
 }

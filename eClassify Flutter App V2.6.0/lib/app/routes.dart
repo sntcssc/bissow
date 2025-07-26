@@ -60,6 +60,13 @@ import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+// Subhankar added
+import 'package:eClassify/ui/screens/home/marquee_messages_screen.dart';
+import 'package:eClassify/ui/screens/marquee/confirm_marquee_message_location_screen.dart';
+import 'package:eClassify/ui/screens/marquee/marquee_message_details_screen.dart';
+import 'package:eClassify/ui/screens/marquee/my_marquee_messages_screen.dart';
+import 'package:eClassify/ui/screens/marquee/success_marquee_message_screen.dart';
+import 'package:eClassify/ui/screens/marquee/add_marquee_message_details.dart';
 
 class Routes {
   static const splash = 'splash';
@@ -146,6 +153,13 @@ class Routes {
   static const qrCodeScannerScreen = '/qrCodeScannerScreen';
 
   static const playground = 'playground';
+  // Subhankar added
+  static const marqueeMessagesScreen = '/marqueeMessagesScreen';
+  static const String myMarqueeMessagesScreen = '/myMarqueeMessagesScreen';
+  static const String addMarqueeMessageDetails = '/addMarqueeMessageDetails';
+  static const String confirmMarqueeMessageLocationScreen = '/confirmMarqueeMessageLocationScreen';
+  static const String marqueeMessageDetailsScreen = '/marqueeMessageDetailsScreen';
+  static const String successMarqueeMessageScreen = '/successMarqueeMessageScreen';
 
   static String currentRoute = '';
   static String previousRoute = '';
@@ -322,6 +336,18 @@ class Routes {
         return QRCodeGenerateScreen.route(routeSettings);
       case qrCodeScannerScreen:
         return QRCodeScannerScreen.route(routeSettings);
+      case marqueeMessagesScreen:
+        return MarqueeMessagesScreen.route(routeSettings);
+      case myMarqueeMessagesScreen:
+        return MyMarqueeMessagesScreen.route(routeSettings);
+      case addMarqueeMessageDetails:
+        return AddMarqueeMessageDetails.route(routeSettings);
+      case confirmMarqueeMessageLocationScreen:
+        return ConfirmMarqueeMessageLocationScreen.route(routeSettings);
+      case marqueeMessageDetailsScreen:
+        return MarqueeMessageDetailsScreen.route(routeSettings);
+      case successMarqueeMessageScreen:
+        return SuccessMarqueeMessageScreen.route(routeSettings);
 
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());

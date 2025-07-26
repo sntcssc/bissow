@@ -12,6 +12,9 @@ import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
+// Subhankar added
+import 'package:eClassify/data/cubits/home/fetch_home_all_marquee_messages_cubit.dart';
+import 'package:eClassify/data/cubits/marquee/fetch_my_marquee_messages_cubit.dart';
 
 class LocationHelperWidget {
   Widget shimmerEffect() {
@@ -255,6 +258,14 @@ class LocationHelperWidget {
           latitude: HiveUtils.getLatitude(),
           country: HiveUtils.getCountryName(),
           state: HiveUtils.getStateName(),
+        );
+        context.read<FetchHomeAllMarqueeMessagesCubit>().fetch(
+          city: HiveUtils.getCityName(),
+          country: HiveUtils.getCountryName(),
+          state: HiveUtils.getStateName(),
+          radius: HiveUtils.getNearbyRadius(),
+          longitude: HiveUtils.getLongitude(),
+          latitude: HiveUtils.getLatitude(),
         );
       },
     );

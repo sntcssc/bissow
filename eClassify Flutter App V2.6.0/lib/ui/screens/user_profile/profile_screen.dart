@@ -985,6 +985,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                 },
                 context: context);
           }),
+          profileMenuWidget("marqueeMessage", AppIcons.articles, () {
+            Navigator.pushNamed(
+              context,
+              Routes.myMarqueeMessagesScreen,
+            );
+            // Navigator.pushNamed(context, Routes.ab);
+          }),
         profileMenuWidget("subscription", AppIcons.subscription, () async {
           UiUtils.checkUser(
               onNotGuest: () {

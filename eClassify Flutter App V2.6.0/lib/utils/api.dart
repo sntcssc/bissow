@@ -132,6 +132,13 @@ class Api {
   static String storeAdvertisementApi = "store-advertisement";
   static String deleteAdvertisementApi = "delete-advertisement";
   static String deleteChatMessageApi = "delete-chat-message";
+  //   Subhankar added
+  static const String getAllMarqueeMessagesApi = 'marquee-messages';
+  static const String addMarqueeMessageApi = 'add-marquee-messages';
+  static const String getMyMarqueeMessagesApi = 'my-marquee-messages';
+  static const String updateMarqueeMessageApi = 'update-marquee-messages';
+  static const String deleteMarqueeMessageApi = 'delete-marquee-messages';
+  static const String updateMarqueeMessageStatusApi = 'marquee-messages/status';
 
 //params
   static String id = "id";

@@ -13,7 +13,9 @@ enum CustomTextFieldValidator {
   otpSix,
   minAndMixLen,
   url,
-  slug
+  slug,
+  number, //Subhankar added
+  date, // ← Add this line
 }
 
 class CustomTextFormField extends StatelessWidget {
@@ -40,6 +42,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextCapitalization? capitalization;
   final bool? isRequired;
   final bool? isMobileRequired;
+  final VoidCallback? onTap; // ← Add this line
 
   const CustomTextFormField({
     super.key,
@@ -66,6 +69,7 @@ class CustomTextFormField extends StatelessWidget {
     this.capitalization,
     this.isRequired,
     this.isMobileRequired = true,
+    this.onTap, // ← Add this line
   });
 
   @override
