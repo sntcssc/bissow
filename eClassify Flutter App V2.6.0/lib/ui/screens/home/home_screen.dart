@@ -22,6 +22,7 @@ import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_search.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/location_widget.dart';
+import 'package:eClassify/ui/screens/home/widgets/scrollable_text_widget.dart';
 import 'package:eClassify/ui/screens/native_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
@@ -224,6 +225,7 @@ class HomeScreenState extends State<HomeScreen>
         const HomeSearchField(),
         const SliderWidget(),
         const MarqueeMessagesWidget(),
+        const ScrollableTextWidget(),
         const CategoryWidgetHome(),
         // const NearbyUsersWidget(),
         ...List.generate(state.sections.length, (index) {

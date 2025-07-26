@@ -4,6 +4,7 @@ import 'package:eClassify/data/helper/designs.dart';
 import 'package:eClassify/data/model/user_model.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/not_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -104,7 +105,7 @@ class _NearbyUsersScreenState extends State<NearbyUsersScreen> {
                     print('NearbyUsersScreen: No users found');
                   }
                   return Center(
-                    child: NoDataFound(
+                    child: NotFound(
                       onTap: getAllUsers,
                       mainMessage: "noUsersFound".translate(context),
                       subMessage:

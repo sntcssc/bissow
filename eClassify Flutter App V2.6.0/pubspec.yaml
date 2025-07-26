@@ -88,6 +88,7 @@ dependencies:
   pro_image_editor: ^10.2.3
   google_fonts: ^6.2.1
   marquee: ^2.3.0
+  marquee_list: ^1.0.0
 
 
 

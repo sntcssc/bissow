@@ -6,6 +6,7 @@ import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/not_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -35,7 +36,7 @@ class MarqueeMessagesWidget extends StatelessWidget {
               print('MarqueeMessagesWidget: No messages found');
             }
             return Center(
-              child: NoDataFound(
+              child: NotFound(
                 mainMessage: "noMarqueeMessagesFound".translate(context),
                 subMessage: "noMessagesAvailableInThisLocation".translate(context),
                 onTap: () {

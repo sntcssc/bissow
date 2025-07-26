@@ -4,6 +4,7 @@ import 'package:eClassify/data/helper/designs.dart';
 import 'package:eClassify/data/model/marquee_message_model.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
+import 'package:eClassify/ui/screens/widgets/errors/not_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -114,7 +115,7 @@ class _MarqueeMessagesScreenState extends State<MarqueeMessagesScreen> {
                     print('MarqueeMessagesScreen: No messages found');
                   }
                   return Center(
-                    child: NoDataFound(
+                    child: NotFound(
                       onTap: getAllMarqueeMessages,
                       mainMessage: "noMarqueeMessagesFound".translate(context),
                       subMessage: "noMessagesAvailableInThisLocation".translate(context),
