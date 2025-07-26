@@ -145,7 +145,6 @@ class _MyMarqueeMessageTabState extends CloudState<MyMarqueeMessageTab> {
           listener: (context, state) {
             if (state is DeleteMarqueeMessageSuccess) {
               HelperUtils.showSnackBarMessage(context, "messageDeleted".translate(context));
-              // Refresh all tabs
               myMarqueeMessagesCubitReference.forEach((key, cubit) {
                 cubit.fetchMyMarqueeMessages(status: key == "all" ? null : key);
               });
@@ -158,7 +157,6 @@ class _MyMarqueeMessageTabState extends CloudState<MyMarqueeMessageTab> {
           listener: (context, state) {
             if (state is ManageMarqueeMessageSuccess) {
               HelperUtils.showSnackBarMessage(context, "statusUpdated".translate(context));
-              // Refresh all tabs
               myMarqueeMessagesCubitReference.forEach((key, cubit) {
                 cubit.fetchMyMarqueeMessages(status: key == "all" ? null : key);
               });
@@ -254,7 +252,6 @@ class _MyMarqueeMessageTabState extends CloudState<MyMarqueeMessageTab> {
                                         message.image ?? "",
                                         height: double.infinity,
                                         fit: BoxFit.cover,
-                                        // placeholderImage: AppIcons.placeholder,
                                       ),
                                     ),
                                   ),
@@ -295,9 +292,9 @@ class _MyMarqueeMessageTabState extends CloudState<MyMarqueeMessageTab> {
                                                           title: "confirmDelete".translate(context),
                                                           content: CustomText("deleteMessageConfirmation".translate(context)),
                                                           acceptButtonName: "delete".translate(context),
-                                                          onAccept: () async { // Make this asynchronous
-                                                            await context.read<DeleteMarqueeMessageCubit>().deleteMarqueeMessage(message.id!); // Ensure this is an async call
-                                                            Navigator.of(context).pop(); // Close the dialog after the delete action
+                                                          onAccept: () async {
+                                                            await context.read<DeleteMarqueeMessageCubit>().deleteMarqueeMessage(message.id!);
+                                                            Navigator.of(context).pop();
                                                           },
                                                         ),
                                                       );
@@ -335,12 +332,16 @@ class _MyMarqueeMessageTabState extends CloudState<MyMarqueeMessageTab> {
                                               ),
                                             ],
                                           ),
-                                          CustomText(
-                                            message.message ?? "",
-                                            maxLines: 2,
-                                            firstUpperCaseWidget: true,
-                                            fontSize: context.font.normal,
-                                            fontWeight: FontWeight.w600,
+                                          Expanded(
+                                            child: CustomText(
+                                              message.message ?? "",
+                                              maxLines: 3, // Limit to 3 lines to prevent overflow
+                                              overflow: TextOverflow.ellipsis, // Add ellipsis for overflow
+                                              firstUpperCaseWidget: true,
+                                              fontSize: context.font.normal,
+                                              fontWeight: FontWeight.w600,
+                                              softWrap: true, // Enable text wrapping
+                                            ),
                                           ),
                                           CustomText(
                                             "${message.city ?? ''}, ${message.country ?? ''}",

@@ -55,7 +55,9 @@ class _MarqueeMessageDetailsScreenState extends State<MarqueeMessageDetailsScree
     try {
       // Placeholder: Replace with actual implementation
       // e.g., currentUserId = await AuthProvider().getUserId();
-      currentUserId = HiveUtils.getUserId() as int?; // Dummy value; replace with real user ID fetching logic
+      String? getUserID = HiveUtils.getUserId();
+      currentUserId = int.parse(getUserID!); // Dummy value; replace with real user ID fetching logic
+      print("User ID : ${currentUserId}");
       setState(() {});
     } catch (e) {
       // Handle error if needed

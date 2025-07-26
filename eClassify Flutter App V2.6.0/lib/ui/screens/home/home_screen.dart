@@ -224,7 +224,7 @@ class HomeScreenState extends State<HomeScreen>
       children: [
         const HomeSearchField(),
         const SliderWidget(),
-        const MarqueeMessagesWidget(),
+        // const MarqueeMessagesWidget(),
         const ScrollableTextWidget(),
         const CategoryWidgetHome(),
         // const NearbyUsersWidget(),
