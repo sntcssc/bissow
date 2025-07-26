@@ -1,23 +1,18 @@
-import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/cubits/home/fetch_home_all_marquee_messages_cubit.dart';
-import 'package:eClassify/data/helper/designs.dart';
-import 'package:eClassify/data/model/marquee_message_model.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
-import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/screens/widgets/errors/not_found.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
 import 'package:eClassify/ui/screens/widgets/shimmerLoadingContainer.dart';
-import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:marquee_list/marquee_list.dart';
 import 'package:marquee/marquee.dart';
+import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/home/fetch_home_all_marquee_messages_cubit.dart';
+import 'package:eClassify/ui/screens/widgets/errors/not_found.dart';
+import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/extensions/extensions.dart';
 
 class ScrollableTextWidget extends StatelessWidget {
   const ScrollableTextWidget({Key? key}) : super(key: key);
@@ -53,6 +48,7 @@ class ScrollableTextWidget extends StatelessWidget {
               ),
             );
           }
+
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: sidePadding, vertical: 12),
             height: 64,
@@ -91,51 +87,49 @@ class ScrollableTextWidget extends StatelessWidget {
                         color: context.color.textDefaultColor,
                         size: 26,
                       ),
-                      const SizedBox(width: 10),
+                      // const SizedBox(width: 10),
                       Text(
-                        "Latest: ",
+                        ":",
                         style: TextStyle(
-                          fontSize: context.font.larger,
-                          fontWeight: FontWeight.w700,
+                          fontSize: context.font.large,
+                          fontWeight: FontWeight.w500,
                           color: context.color.textDefaultColor,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: MarqueeList(
-                    scrollDirection: Axis.horizontal,
-                    scrollDuration: const Duration(seconds: 4),
-                    // reverse: false,
-                    children: state.messages.map((message) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            Routes.marqueeMessageDetailsScreen,
-                            arguments: {"model": message},
-                          );
-                        },
-                        splashColor: context.color.territoryColor.withOpacity(0.3),
-                        highlightColor: context.color.territoryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            message.message ?? "No message",
-                            style: TextStyle(
-                              fontSize: context.font.normal,
-                              fontWeight: FontWeight.w500,
-                              color: context.color.textDefaultColor.withOpacity(0.9),
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                  child: GestureDetector(
+                    onTap: () {
+                      // You can implement custom logic to navigate to the details screen here
+                      if (state.messages.isNotEmpty) {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.marqueeMessageDetailsScreen,
+                          arguments: {"model": state.messages.first}, // Navigate to the first message
+                        );
+                      }
+                    },
+                    child: Marquee(
+                      text: state.messages.map((m) => m.message ?? "No message").join('  •  '),
+                      style: TextStyle(
+                        fontSize: context.font.normal,
+                        fontWeight: FontWeight.w500,
+                        color: context.color.textDefaultColor.withOpacity(0.9),
+                        letterSpacing: 0.3,
+                      ),
+                      scrollAxis: Axis.horizontal,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      blankSpace: 20.0,
+                      velocity: 50.0,
+                      pauseAfterRound: const Duration(seconds: 2),
+                      startPadding: 16.0,
+                      accelerationDuration: const Duration(seconds: 1),
+                      accelerationCurve: Curves.linear,
+                      decelerationCurve: Curves.linear,
+                    ),
                   ),
                 ),
               ],
